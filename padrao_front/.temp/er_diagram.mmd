@@ -1,0 +1,73 @@
+erDiagram
+  USUARIOS {
+    int id_usuario PK
+    string nickname
+    string nome
+    string email
+    string matricula
+    string cargo
+    string departamento
+    string ativo
+    datetime ultimo_acesso
+    datetime data_criacao
+  }
+
+  OPERADORAS {
+    int id_operadora PK
+    string nm_operadora
+  }
+
+  PROCESSOS {
+    int id_processo PK
+    string processo_external_id
+    string assunto
+    string requerente
+    string orgao_origem
+    datetime data_entrada
+    datetime prazo_final
+    datetime prazo_area_tecnica
+    string situacao
+    int responsavel_id FK
+    string documento_sei
+    string especial
+    text observacao
+    int id_operadora FK
+  }
+
+  PENDENCIAS {
+    int id_pendencia PK
+    int id_processo FK
+    string titulo
+    string setor
+    int dias_restantes
+    string status
+    datetime data_criacao
+    datetime prazo_final
+    int responsavel_id FK
+  }
+
+  DOCUMENTOS {
+    int id_documento PK
+    int id_processo FK
+    string tipo_documento
+    string documento_sei
+    text conteudo
+    datetime data_inclusao
+  }
+
+  AUDIT_LOG {
+    int id_evento PK
+    string tabela_alvo
+    int id_registro
+    string usuario
+    string evento_tipo
+    text dados_antes
+    text dados_depois
+    datetime data_evento
+  }
+
+  PROCESSOS }o--|| USUARIOS : "responsavel_id -> id_usuario"
+  PROCESSOS }o--|| OPERADORAS : "id_operadora -> id_operadora"
+  PENDENCIAS }o--|| PROCESSOS : "id_processo -> id_processo"
+  PENDENCIAS }o--|| USUARIOS : "responsavel_id -> id_usuario"
+  DOCUMENTOS }o--|| PROCESSOS : "id_processo -> id_processo"
