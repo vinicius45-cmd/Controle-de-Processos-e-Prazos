@@ -12,6 +12,27 @@ export interface Operadora {
   nmOperadora: string;
 }
 
+export interface Ente {
+  idEnte: number;
+  nmEnte: string;
+  sgEnte: string;
+  blAtivo: 'S' | 'N';
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
+  dtAtualizacao?: string;
+  idUsuarioAtualizacao?: number;
+}
+
+export interface Unidade {
+  idUnidade: number;
+  nmUnidade: string;
+  sgUnidade: string;
+  blAtivo: 'S' | 'N';
+  idUnidadeSuperior?: number | null;
+  dtInicioVigencia?: string;
+  dtFimVigencia?: string | null;
+}
+
 export interface Usuario {
   id: string; // Nickname
   idUsuario?: number;
@@ -31,8 +52,11 @@ export interface FormCadastro {
   assunto: string;
   assuntoTipo: string;
   destinatario: string;
+  idUnidade?: number | null;
   solicitudesInformacao: string[];
-  orgaoOrigem: string;
+  idEnte?: number | null;
+  /** Campo legado; novos registros devem persistir somente idEnte. */
+  orgaoOrigem?: string;
   dataEntrada: string;
   prazoAreaTecnica: string;
   prazoFinal: string;

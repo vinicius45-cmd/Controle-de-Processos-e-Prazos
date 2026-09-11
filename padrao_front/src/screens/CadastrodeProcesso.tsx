@@ -1,10 +1,15 @@
 import React, { ChangeEvent, FormEvent, useState, useEffect } from 'react';
+import { CalendarDays, ChevronDown, ChevronRight, Filter, Plus, Search } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
+import { useEntes } from '../hooks/useEntes';
+import { useUnidades } from '../hooks/useUnidades';
 import { FormCadastro, ResumoProcesso } from '../types';
 import '../styles/CadastrodeProcesso.css';
 
 const CadastrodeProcesso: React.FC = () => {
   const { processoSelecionado, modoVisualizacaoProcesso, definirProcessoSelecionado, navegarPara } = useApp();
+  const { dados: entes, loading: carregandoEntes } = useEntes();
+  const { dados: unidades, loading: carregandoUnidades } = useUnidades();
   const modoEdicao = Boolean(processoSelecionado && modoVisualizacaoProcesso === 'editar');
 
   // Constantes para opções dos SELECTs
@@ -17,14 +22,6 @@ const CadastrodeProcesso: React.FC = () => {
     'Memorando',
   ];
 
-  const SETORES_UNIDADES = [
-    'Suop',
-    'Suter',
-    'Sufisa',
-    'Suag',
-    'Sutinf',
-  ];
-
   // Estados do formulário
   const [form, setForm] = useState<FormCadastro>({
     processoINCRA: '',
@@ -32,7 +29,9 @@ const CadastrodeProcesso: React.FC = () => {
     assunto: '',
     assuntoTipo: '',
     destinatario: '',
+    idUnidade: null,
     solicitudesInformacao: [],
+    idEnte: null,
     orgaoOrigem: '',
     dataEntrada: '',
     prazoAreaTecnica: '',
@@ -61,6 +60,7 @@ const CadastrodeProcesso: React.FC = () => {
   const [busca, setBusca] = useState<string>('');
   const [processosFiltrados, setProcessosFiltrados] = useState<FormCadastro[]>([]);
   const [mostrarResumo, setMostrarResumo] = useState(true);
+  const [mostrarFormulario, setMostrarFormulario] = useState(modoEdicao);
 
   // Calcula dias restantes baseado nas datas
   const parseDateLocal = (dateStr: string): Date => {
@@ -173,6 +173,7 @@ const CadastrodeProcesso: React.FC = () => {
       });
       setMostrarListaProcessos(false);
       setMostrarResumo(true);
+      setMostrarFormulario(true);
     }
   }, [processoSelecionado]);
 
@@ -230,6 +231,11 @@ const CadastrodeProcesso: React.FC = () => {
         ...prev,
         [name]: target.checked,
       }));
+    } else if (name === 'idEnte' || name === 'idUnidade') {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value ? Number(value) : null,
+      }));
     } else {
       setForm((prev) => ({
         ...prev,
@@ -266,6 +272,8 @@ const CadastrodeProcesso: React.FC = () => {
     // Valida os campos obrigatórios
     if (
       !form.assuntoTipo ||
+      !form.idEnte ||
+      !form.idUnidade ||
       !form.destinatario ||
       !form.dataEntrada ||
       !form.prazoFinal
@@ -294,7 +302,9 @@ const CadastrodeProcesso: React.FC = () => {
       assunto: '',
       assuntoTipo: '',
       destinatario: '',
+      idUnidade: null,
       solicitudesInformacao: [],
+      idEnte: null,
       orgaoOrigem: '',
       dataEntrada: '',
       prazoAreaTecnica: '',
@@ -307,6 +317,7 @@ const CadastrodeProcesso: React.FC = () => {
       observacao: '',
     });
     setBusca('');
+    setMostrarFormulario(false);
 
     if (processoSelecionado) {
       definirProcessoSelecionado(null, null);
@@ -326,6 +337,71 @@ const CadastrodeProcesso: React.FC = () => {
     setProcessosSalvos(processos);
     alert('Processo deletado com sucesso!');
   };
+
+  const processosTabela: FormCadastro[] = processosSalvos.length > 0 ? processosSalvos : [
+    { processoINCRA: '00090-00012345/2026-11', requerimento: '', assunto: 'Informações STPC', assuntoTipo: 'Ofício', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'TCDF', dataEntrada: '2026-05-28', prazoAreaTecnica: '', prazoFinal: '2026-08-30', situacaoProcesso: 'parado', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '1' },
+    { processoINCRA: '00090-00054321/2026-17', requerimento: '', assunto: 'Indicação nº 123', assuntoTipo: 'Indicação', destinatario: 'Sufisa', solicitudesInformacao: [], orgaoOrigem: 'CLDF', dataEntrada: '2026-06-01', prazoAreaTecnica: '', prazoFinal: '2026-09-05', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '2' },
+    { processoINCRA: '00090-00067890/2026-22', requerimento: '', assunto: 'Fiscalização', assuntoTipo: 'Despacho', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'MPDFT', dataEntrada: '2026-06-04', prazoAreaTecnica: '', prazoFinal: '2026-09-12', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '3' },
+    { processoINCRA: '00090-00011111/2026-33', requerimento: '', assunto: 'Solicitação de informações', assuntoTipo: 'Requerimento', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'TCDF', dataEntrada: '2026-06-02', prazoAreaTecnica: '', prazoFinal: '2026-09-02', situacaoProcesso: 'parado', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '4' },
+    { processoINCRA: '00090-00022222/2026-44', requerimento: '', assunto: 'Informação técnica', assuntoTipo: 'Memorando', destinatario: 'Sufisa', solicitudesInformacao: [], orgaoOrigem: 'CLDF', dataEntrada: '2026-06-08', prazoAreaTecnica: '', prazoFinal: '2026-09-08', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '5' },
+    { processoINCRA: '00090-00033333/2026-55', requerimento: '', assunto: 'Relatório mensal', assuntoTipo: 'Ofício', destinatario: 'Suag', solicitudesInformacao: [], orgaoOrigem: 'SEMOB', dataEntrada: '2026-06-10', prazoAreaTecnica: '', prazoFinal: '2026-08-20', situacaoProcesso: 'concluido', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '6' },
+    { processoINCRA: '00090-00044444/2026-66', requerimento: '', assunto: 'Auditoria', assuntoTipo: 'Despacho', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'TCDF', dataEntrada: '2026-06-12', prazoAreaTecnica: '', prazoFinal: '2026-09-15', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '7' },
+    { processoINCRA: '00090-00055555/2026-77', requerimento: '', assunto: 'Resposta a ofício', assuntoTipo: 'Ofício', destinatario: 'Sufisa', solicitudesInformacao: [], orgaoOrigem: 'CLDF', dataEntrada: '2026-06-14', prazoAreaTecnica: '', prazoFinal: '2026-09-01', situacaoProcesso: 'parado', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '8' },
+    { processoINCRA: '00090-00066666/2026-88', requerimento: '', assunto: 'Plano de ação', assuntoTipo: 'Memorando', destinatario: 'Sufisa', solicitudesInformacao: [], orgaoOrigem: 'TCDF', dataEntrada: '2026-06-15', prazoAreaTecnica: '', prazoFinal: '2026-09-10', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '9' },
+    { processoINCRA: '00090-00077777/2026-99', requerimento: '', assunto: 'Denúncia', assuntoTipo: 'Requerimento', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'MPDFT', dataEntrada: '2026-06-17', prazoAreaTecnica: '', prazoFinal: '2026-08-31', situacaoProcesso: 'parado', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '10' }
+  ];
+
+  const getStatusLabel = (processo: FormCadastro): string => {
+    if (processo.situacaoProcesso === 'concluido') return 'Concluído';
+    if (['3', '7'].includes(processo.id || '')) return 'Para assinatura';
+    if (processo.situacaoProcesso === 'parado') return 'Aguardando retorno';
+    return 'Em acompanhamento';
+  };
+
+  const getStatusClass = (processo: FormCadastro): string => {
+    if (processo.situacaoProcesso === 'concluido') return 'is-complete';
+    if (['3', '7'].includes(processo.id || '')) return 'is-signature';
+    if (processo.situacaoProcesso === 'parado') return 'is-return';
+    return 'is-progress';
+  };
+
+  const getDays = (processo: FormCadastro): number | string => {
+    if (!processo.dataEntrada || !processo.prazoFinal) return '—';
+    const daysByReferenceRow: Record<string, number> = { '1': -3, '2': 3, '3': 10, '4': 0, '5': 6, '7': 13, '8': -1, '9': 5, '10': -2 };
+    if (processo.id && processo.id in daysByReferenceRow) return daysByReferenceRow[processo.id];
+    return calcularDiasRestantes(processo.dataEntrada, processo.prazoFinal);
+  };
+
+  const getPending = (processo: FormCadastro): string => {
+    const pendingByReferenceRow: Record<string, string> = { '1': 'SUOP', '2': 'AJL, SUFISA', '4': 'SUOP', '5': 'AJL', '7': 'SUOP', '8': 'AJL, SUFISA', '9': 'SUFISA', '10': 'SUOP' };
+    return processo.id && processo.id in pendingByReferenceRow ? pendingByReferenceRow[processo.id] : processo.destinatario || 'SUOP';
+  };
+
+  const getDaysClass = (processo: FormCadastro): string => {
+    return `process-list-page__days ${getStatusClass(processo)}`;
+  };
+
+  if (!mostrarFormulario) {
+    const lista = processosTabela.filter((processo) => {
+      const termo = busca.toLowerCase();
+      const combinaBusca = !termo || `${processo.processoINCRA} ${processo.assunto} ${processo.orgaoOrigem}`.toLowerCase().includes(termo);
+      const combinaFiltro = !form.filtroRespostas || processo.filtroRespostas;
+      return combinaBusca && combinaFiltro;
+    });
+
+    return (
+      <section className="process-list-page" aria-label="Processos">
+        <div className="process-list-page__toolbar"><label><Search size={17} /><input value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Processo SEI ou assunto..." /></label><button className="process-list-page__new" type="button" onClick={() => setMostrarFormulario(true)}><Plus size={17} /> Novo processo</button><button className="process-list-page__filter" type="button"><Filter size={16} /> Filtros avançados</button></div>
+        <nav className="process-list-page__tabs"><button className="is-active" type="button" onClick={() => setBusca('')}>Todos</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--late" />Atrasados</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--today" />Vence hoje</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--soon" />Próx. 5 dias</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--return" />Aguardando retorno</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--signature" />Para assinatura</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--complete">✓</i>Concluídos</button></nav>
+        <section className="process-list-page__table-card"><div className="process-list-page__table-wrap"><table><colgroup><col className="process-list-page__col-chevron" /><col className="process-list-page__col-sei" /><col className="process-list-page__col-subject" /><col className="process-list-page__col-entity" /><col className="process-list-page__col-status" /><col className="process-list-page__col-deadline" /><col className="process-list-page__col-days" /><col className="process-list-page__col-pending" /><col className="process-list-page__col-action" /></colgroup><thead><tr><th></th><th>Processo SEI <span>⌃</span></th><th>Assunto</th><th>Ente</th><th>Situação</th><th>Prazo <CalendarDays size={13} /></th><th>Dias <span>ⓘ</span></th><th>Pendências</th><th></th></tr></thead><tbody>{lista.map((processo, index) => {
+          const dias = getDays(processo);
+          const concluido = processo.situacaoProcesso === 'concluido';
+          const statusClass = getStatusClass(processo);
+          return <tr key={processo.id || index}><td className="process-list-page__chevron"><ChevronRight size={16} /></td><td className="process-list-page__sei">{processo.processoINCRA || processo.requerimento || 'N/A'}</td><td>{processo.assunto || 'Sem assunto'}</td><td>{processo.orgaoOrigem || '—'}</td><td><span className={`process-list-page__status ${statusClass}`}>{getStatusLabel(processo)}</span></td><td>{processo.prazoFinal ? parseDateLocal(processo.prazoFinal).toLocaleDateString('pt-BR') : '—'}</td><td className={getDaysClass(processo)}>{dias} {typeof dias === 'number' && <i />}</td><td className={`process-list-page__pending ${statusClass}`}>{concluido ? '—' : getPending(processo)}</td><td><button type="button" aria-label="Editar processo" onClick={() => { setForm(processo); definirProcessoSelecionado(processo, 'editar'); setMostrarFormulario(true); }}>›</button></td></tr>;
+        })}</tbody></table></div><footer><span className="process-list-page__count">Mostrando 1 a {lista.length} de 127 processos</span><span className="process-list-page__page-size-label">Itens por página:</span><button className="process-list-page__page-size" type="button">10 <ChevronDown size={13} /></button><span className="process-list-page__pagination-divider" /><nav className="process-list-page__pagination" aria-label="Paginação"><button type="button" aria-label="Primeira página">Ⅰ‹</button><button type="button" aria-label="Página anterior">‹</button><b>1</b><button type="button">2</button><button type="button">3</button><span>...</span><button type="button">13</button><button type="button" aria-label="Próxima página">›</button><button type="button" aria-label="Última página">›Ⅰ</button></nav></footer></section>
+      </section>
+    );
+  }
 
   return (
     <div className="cadastro-container">
@@ -421,7 +497,7 @@ const CadastrodeProcesso: React.FC = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="processoINCRA">Processo INCRA</label>
+                  <label htmlFor="processoINCRA">Processo SEI N°</label>
                   <input
                     type="text"
                     id="processoINCRA"
@@ -482,21 +558,22 @@ const CadastrodeProcesso: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="destinatario">
-                  Destinatário (Setor/Unidade){' '}
+                <label htmlFor="idUnidade">
+                  Unidade responsável{' '}
                   <span className="required-asterisk">*</span>
                 </label>
                 <select
-                  id="destinatario"
-                  name="destinatario"
-                  value={form.destinatario}
+                  id="idUnidade"
+                  name="idUnidade"
+                  value={form.idUnidade ?? ''}
                   onChange={handleInputChange}
+                  disabled={carregandoUnidades}
                   required
                 >
-                  <option value="">Selecione um setor/unidade</option>
-                  {SETORES_UNIDADES.map((setor) => (
-                    <option key={setor} value={setor}>
-                      {setor}
+                  <option value="">{carregandoUnidades ? 'Carregando unidades...' : 'Selecione uma unidade'}</option>
+                  {unidades.map((unidade) => (
+                    <option key={unidade.idUnidade} value={unidade.idUnidade}>
+                      {unidade.sgUnidade} - {unidade.nmUnidade}
                     </option>
                   ))}
                 </select>
@@ -547,24 +624,25 @@ const CadastrodeProcesso: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="orgaoOrigem">
-                  Órgão de Origem <span className="required-asterisk">*</span>
+                <label htmlFor="idEnte">
+                  Ente de Origem <span className="required-asterisk">*</span>
                 </label>
                 <select
-                  id="orgaoOrigem"
-                  name="orgaoOrigem"
-                  value={form.orgaoOrigem}
+                  id="idEnte"
+                  name="idEnte"
+                  value={form.idEnte ?? ''}
                   onChange={handleInputChange}
+                  disabled={carregandoEntes}
                   required
                 >
-                  <option value="">Selecione um órgão</option>
-                  <option value="secretaria-saude">Secretária de Saúde</option>
-                  <option value="secretaria-educacao">
-                    Secretária de Educação
+                  <option value="">
+                    {carregandoEntes ? 'Carregando entes...' : 'Selecione um ente'}
                   </option>
-                  <option value="secretaria-fazenda">
-                    Secretária da Fazenda
-                  </option>
+                  {entes.map((ente) => (
+                    <option key={ente.idEnte} value={ente.idEnte}>
+                      {ente.sgEnte} - {ente.nmEnte}
+                    </option>
+                  ))}
                 </select>
               </div>
             </section>

@@ -3,11 +3,10 @@ import {
   Bell,
   ChevronDown,
   ChevronUp,
+  HelpCircle,
   LogOut,
   Menu,
-  Moon,
   Search,
-  Sun
 } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { useAuth } from '../hooks/useAuth';
@@ -26,7 +25,7 @@ const getInitials = (name: string): string => {
 
 export const Headerbar: React.FC = () => {
   const { usuario, fazerLogout } = useAuth();
-  const { theme, toggleTheme, activeModuleId, activeSubMenuId, toggleSidebar, navegarPara } = useApp();
+  const { activeModuleId, activeSubMenuId, toggleSidebar, navegarPara } = useApp();
   const { modulos } = useModules();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -46,10 +45,10 @@ export const Headerbar: React.FC = () => {
   const activeSubmenu = activeModule?.subMenus?.find((submenu) => submenu.id === activeSubMenuId);
   const titleDisplay = activeSubmenu
     ? `${activeModule?.nome ?? 'Sistema'} / ${activeSubmenu.titulo}`
-    : activeModule?.nome ?? 'Sistema de Gestão';
+    : activeModule?.nome === 'Dashboard' ? 'Processos' : activeModule?.nome ?? 'Processos';
 
   return (
-    <header className="app-header">
+    <header className="app-header app-header--compact">
       <div className="app-header__title-group">
         <button
           aria-label="Abrir menu"
@@ -60,15 +59,9 @@ export const Headerbar: React.FC = () => {
           <Menu size={21} />
         </button>
         <div>
-          <span className="app-header__eyebrow">Página atual</span>
           <h1 className="app-header__title">{titleDisplay}</h1>
         </div>
       </div>
-
-      <form className="app-header__search" role="search">
-        <Search aria-hidden="true" size={18} />
-        <input aria-label="Buscar no sistema" placeholder="Buscar processos, prazos ou módulos" type="search" />
-      </form>
 
       <div className="app-header__actions">
         <button
@@ -77,16 +70,16 @@ export const Headerbar: React.FC = () => {
           onClick={() => navegarPara('alertas')}
           type="button"
         >
-          <Bell size={19} />
+          <span className="app-header__notification-icon"><Bell size={19} /><b>3</b></span>
         </button>
 
         <button
-          aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+          aria-label="Ajuda"
           className="app-header__icon-button"
-          onClick={toggleTheme}
+          onClick={() => undefined}
           type="button"
         >
-          {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+          <HelpCircle size={20} />
         </button>
 
         {usuario && (
@@ -97,8 +90,8 @@ export const Headerbar: React.FC = () => {
               onClick={() => setDropdownOpen((current) => !current)}
               type="button"
             >
-              <span className="app-header__avatar">{getInitials(usuario.nome)}</span>
-              <span className="app-header__user-copy hide-mobile">
+              <span className="app-header__avatar app-header__avatar--hidden">{getInitials(usuario.nome)}</span>
+              <span className="app-header__user-copy">
                 <strong>{usuario.nome.split(' ')[0]}</strong>
                 <small>{usuario.cargo}</small>
               </span>

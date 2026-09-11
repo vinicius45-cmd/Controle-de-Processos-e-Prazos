@@ -8,9 +8,11 @@ import {
   FileText,
   Home,
   LucideIcon,
+  LogOut,
   Settings,
   X
 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 export type MenuItem = {
   id: string;
@@ -49,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   title = 'CONTROLE DE PROCESSOS E PRAZOS'
 }) => {
+  const { fazerLogout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -74,9 +77,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ].filter(Boolean).join(' ');
 
   const normalizedCurrentPath = normalizePath(currentPath);
-  const titleLines = title.split(' ');
-  const firstTitleLine = titleLines.slice(0, 2).join(' ');
-  const secondTitleLine = titleLines.slice(2).join(' ');
+  const brandTitle = 'SEMOB-DF';
+  const brandSubtitle = 'Gestão de Processos';
 
   return (
     <>
@@ -92,13 +94,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside aria-label="Menu principal" className={sidebarClasses}>
         <header className="app-sidebar__brand">
           <div className="app-sidebar__brand-mark" aria-hidden="true">
-            <FileText size={23} strokeWidth={1.8} />
+            <span className="app-sidebar__brand-mark-inner">DF</span>
           </div>
 
           {(!collapsed || isMobile) && (
             <div className="app-sidebar__brand-copy">
-              <strong>{firstTitleLine}</strong>
-              <strong>{secondTitleLine}</strong>
+              <strong>{brandTitle}</strong>
+              <span>{brandSubtitle}</span>
             </div>
           )}
 
@@ -121,38 +123,58 @@ export const Sidebar: React.FC<SidebarProps> = ({
             const isActive = normalizedCurrentPath === normalizedItemPath;
 
             return (
-              <button
-                aria-current={isActive ? 'page' : undefined}
-                className={[
-                  'app-sidebar__item',
-                  isActive ? 'app-sidebar__item--active' : ''
-                ].filter(Boolean).join(' ')}
-                key={item.id}
-                onClick={() => onNavigate(item.path, item)}
-                title={collapsed && !isMobile ? item.label : undefined}
-                type="button"
-              >
-                <span className="app-sidebar__item-icon">
-                  <Icon aria-hidden="true" size={18} strokeWidth={1.9} />
-                </span>
-
-                {(!collapsed || isMobile) && (
-                  <span className="app-sidebar__item-label">{item.label}</span>
+              <React.Fragment key={item.id}>
+                {item.id === 'administracao' && !collapsed && (
+                  <span className="app-sidebar__section-label">ADMINISTRAÇÃO</span>
                 )}
-              </button>
+                <button
+                  aria-current={isActive ? 'page' : undefined}
+                  className={[
+                    'app-sidebar__item',
+                    isActive ? 'app-sidebar__item--active' : ''
+                  ].filter(Boolean).join(' ')}
+                  onClick={() => onNavigate(item.path, item)}
+                  title={collapsed && !isMobile ? item.label : undefined}
+                  type="button"
+                >
+                  <span className="app-sidebar__item-icon">
+                    {item.id === 'dashboard' ? (
+                      <span className="app-sidebar__dashboard-icon" aria-hidden="true">
+                        <i /><i /><i /><i />
+                      </span>
+                    ) : (
+                      <Icon aria-hidden="true" size={22} strokeWidth={1.8} />
+                    )}
+                  </span>
+
+                  {(!collapsed || isMobile) && (
+                    <span className="app-sidebar__item-label">{item.label}</span>
+                  )}
+                </button>
+              </React.Fragment>
             );
           })}
         </nav>
 
-        {!isMobile && (
-          <button
-            aria-label={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
-            className="app-sidebar__collapse"
-            onClick={() => setCollapsed((current) => !current)}
-            type="button"
-          >
-            <ArrowLeft aria-hidden="true" size={17} strokeWidth={2} />
-            {!collapsed && <span>Recolher menu</span>}
+        <div className="app-sidebar__user">
+          <div className="app-sidebar__user-avatar">MS</div>
+          {(!collapsed || isMobile) && (
+            <div className="app-sidebar__user-copy">
+              <strong>Maria Silva</strong>
+              <span>ASSAD</span>
+            </div>
+          )}
+          {!isMobile && (
+            <button aria-label="Abrir perfil" className="app-sidebar__user-toggle" type="button">
+              <ArrowLeft size={16} strokeWidth={2} />
+            </button>
+          )}
+        </div>
+
+        {!collapsed && (
+          <button className="app-sidebar__logout" onClick={fazerLogout} type="button">
+            <LogOut aria-hidden="true" size={17} strokeWidth={2} />
+            <span>Sair</span>
           </button>
         )}
       </aside>

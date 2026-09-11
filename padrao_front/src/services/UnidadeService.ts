@@ -1,0 +1,60 @@
+import { api } from '../config/api';
+import { localMockUnidades } from '../config/mock';
+import { Unidade } from '../types';
+
+type DadosUnidade = Pick<Unidade, 'nmUnidade' | 'sgUnidade' | 'idUnidadeSuperior'>;
+
+export const UnidadeService = {
+  async listar(filtro = '', apenasAtivas = true): Promise<Unidade[]> {
+    try {
+      const { data } = await api.get<Unidade[]>('/unidades', {
+        params: { filtro, ...(apenasAtivas ? { blAtivo: 'S' } : {}) }
+      });
+      return data;
+    } catch {
+      const termo = filtro.trim().toLowerCase();
+      return localMockUnidades.filter((unidade) => (
+        (!apenasAtivas || unidade.blAtivo === 'S') &&
+        (!termo || `${unidade.nmUnidade} ${unidade.sgUnidade}`.toLowerCase().includes(termo))
+      ));
+    }
+  },
+
+  async cadastrar(dados: DadosUnidade): Promise<Unidade> {
+    try {
+      const { data } = await api.post<Unidade>('/unidades', { ...dados, blAtivo: 'S' });
+      return data;
+    } catch {
+      const novaUnidade: Unidade = {
+        idUnidade: Math.max(...localMockUnidades.map((item) => item.idUnidade), 0) + 1,
+        ...dados,
+        blAtivo: 'S'
+      };
+      localMockUnidades.push(novaUnidade);
+      return novaUnidade;
+    }
+  },
+
+  async atualizar(idUnidade: number, dados: DadosUnidade): Promise<Unidade> {
+    try {
+      const { data } = await api.put<Unidade>(`/unidades/${idUnidade}`, dados);
+      return data;
+    } catch {
+      const indice = localMockUnidades.findIndex((item) => item.idUnidade === idUnidade);
+      if (indice < 0) throw new Error('Unidade não encontrada');
+      localMockUnidades[indice] = { ...localMockUnidades[indice], ...dados };
+      return localMockUnidades[indice];
+    }
+  },
+
+  async alterarStatus(idUnidade: number, blAtivo: 'S' | 'N'): Promise<void> {
+    try {
+      await api.patch(`/unidades/${idUnidade}/status`, { blAtivo });
+    } catch {
+      const unidade = localMockUnidades.find((item) => item.idUnidade === idUnidade);
+      if (unidade) unidade.blAtivo = blAtivo;
+    }
+  }
+};
+
+export default UnidadeService;

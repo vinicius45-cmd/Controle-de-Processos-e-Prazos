@@ -28,11 +28,13 @@ import {
   ClipboardList,
   FileCheck2,
   Bell,
+  FolderClosed,
+  Grid2X2,
   Settings
 } from 'lucide-react';
 
 const sidebarIconMap = {
-  LayoutDashboard,
+  LayoutDashboard: Grid2X2,
   Building2,
   Shield,
   ShieldCheck,
@@ -42,7 +44,7 @@ const sidebarIconMap = {
   Route,
   Bus,
   FileText,
-  FilePenLine,
+  FilePenLine: FolderClosed,
   CreditCard,
   Lock,
   Terminal,
@@ -106,23 +108,14 @@ const MainLayoutShell: React.FC = () => {
   const activeSubmenu = activeModule?.subMenus?.find((submenu) => submenu.id === activeSubMenuId);
   const ViewComponent = activeSubmenu ? activeSubmenu.componente : activeModule?.componente ?? null;
   const currentPath = activeSubmenu?.rota ?? activeModule?.rota ?? 'dashboard';
-  const sidebarItems: MenuItem[] = modulos.flatMap((module) => {
-    if (module.subMenus?.length) {
-      return module.subMenus.map((submenu) => ({
-        id: submenu.id,
-        label: submenu.titulo,
-        icon: getSidebarIcon(submenu.icone),
-        path: submenu.rota ?? module.rota
-      }));
-    }
-
-    return [{
+  const sidebarItems: MenuItem[] = modulos
+    .filter((module) => ['dashboard', 'cadastro-processo', 'administracao'].includes(module.id))
+    .map((module) => ({
       id: module.id,
-      label: module.nome,
+      label: module.id === 'dashboard' ? 'Painel' : module.id === 'cadastro-processo' ? 'Processos' : 'Administração',
       icon: getSidebarIcon(module.icone),
       path: module.rota
-    }];
-  });
+    }));
 
   const handleSidebarNavigate = (path: string) => {
     const moduleMatch = modulos.find((module) => module.rota === path);

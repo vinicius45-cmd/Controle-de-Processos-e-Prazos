@@ -1,4 +1,4 @@
-import { CdpUsuario, Operadora } from '../types';
+import { CdpUsuario, Ente, Operadora, Unidade } from '../types';
 
 export const MOCK_CDP_USERS: CdpUsuario[] = [
   {
@@ -142,4 +142,19 @@ export const localMockOperadoras: Operadora[] = [
   { idOperadora: 303, nmOperadora: 'Viação Marechal' },
   { idOperadora: 404, nmOperadora: 'Urbi Mobilidade Urbana' },
   { idOperadora: 505, nmOperadora: 'Viação Pioneira' }
+];
+
+export const localMockEntes: Ente[] = [
+  { idEnte: 1, nmEnte: 'Tribunal de Contas do Distrito Federal', sgEnte: 'TCDF', blAtivo: 'S' },
+  { idEnte: 2, nmEnte: 'Câmara Legislativa do Distrito Federal', sgEnte: 'CLDF', blAtivo: 'S' },
+  { idEnte: 3, nmEnte: 'Ministério Público do Distrito Federal e Territórios', sgEnte: 'MPDFT', blAtivo: 'S' },
+  { idEnte: 4, nmEnte: 'Secretaria de Estado de Mobilidade do Distrito Federal', sgEnte: 'SEMOB', blAtivo: 'S' }
+];
+
+export const localMockUnidades: Unidade[] = [
+  { idUnidade: 1, nmUnidade: 'Subsecretaria de Operações', sgUnidade: 'SUOP', blAtivo: 'S', idUnidadeSuperior: null },
+  { idUnidade: 2, nmUnidade: 'Subsecretaria de Regulação', sgUnidade: 'SUTER', blAtivo: 'S', idUnidadeSuperior: null },
+  { idUnidade: 3, nmUnidade: 'Subsecretaria de Fiscalização', sgUnidade: 'SUFISA', blAtivo: 'S', idUnidadeSuperior: null },
+  { idUnidade: 4, nmUnidade: 'Coordenação de Processos da SUOP', sgUnidade: 'CP-SUOP', blAtivo: 'S', idUnidadeSuperior: 1 },
+  { idUnidade: 5, nmUnidade: 'Coordenação de Processos da SUFISA', sgUnidade: 'CP-SUFISA', blAtivo: 'S', idUnidadeSuperior: 3 }
 ];

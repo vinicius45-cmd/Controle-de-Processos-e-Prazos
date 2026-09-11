@@ -87,6 +87,24 @@
   overflow: hidden;
 }
 
+.administracao-catalog-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+}
+
+.administracao-catalog-toolbar .administracao-form-input {
+  flex: 1;
+}
+
+.administracao-form-card--inline {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+}
+
 .administracao-table {
   border-collapse: collapse;
   width: 100%;

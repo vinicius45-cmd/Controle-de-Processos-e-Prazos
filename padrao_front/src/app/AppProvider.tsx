@@ -8,7 +8,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [activeModuleId, setActiveModuleId] = useState<string>('dash');
+  const [activeModuleId, setActiveModuleId] = useState<string>('dashboard');
   const [activeSubMenuId, setActiveSubMenuId] = useState<string | null>(null);
   const [processoSelecionado, setProcessoSelecionado] = useState<FormCadastro | null>(null);
   const [modoVisualizacaoProcesso, setModoVisualizacaoProcesso] = useState<'editar' | 'visualizar' | null>(null);

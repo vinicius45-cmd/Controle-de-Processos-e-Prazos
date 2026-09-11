@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
   ClipboardList,
+  AlertTriangle,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Clock3,
   Droplet,
   Eye,
   EyeOff,
   FileSignature,
+  Info,
   LucideIcon,
   MoreVertical,
   PackagePlus,
+  PenLine,
   Puzzle,
+  RotateCcw,
+  SlidersHorizontal,
   TimerReset,
   Trash2
 } from 'lucide-react';
@@ -439,7 +448,120 @@ export const Dashboard: React.FC = () => {
   const resumoCards = getResumoCards(processosExibicao);
 
   return (
-    <section className="dashboard-page" aria-label="Dashboard">
+    <section className="dashboard-page dashboard-page--management" aria-label="Dashboard de processos">
+      <header className="management-heading">
+        <h1>ASSAD <span>— Gestão de Processos</span></h1>
+        <div className="management-heading__actions"><span>♧</span><span>?</span><span>⇥</span></div>
+      </header>
+
+      <div className="management-filters" aria-label="Filtros de processos">
+        {['Período', 'Assunto', 'Ente', 'Situação'].map((label) => (
+          <label key={label}><span>{label}</span><button type="button">Todos <ChevronDown size={14} /></button></label>
+        ))}
+        <button className="management-filters__advanced" type="button"><SlidersHorizontal size={15} /> Filtros avançados</button>
+      </div>
+
+      <div className="management-metrics">
+        {[
+          { label: 'Processos ativos', value: '127', tone: 'blue', icon: ClipboardList, filter: 'Total de Processos' },
+          { label: 'Atrasados', value: '14', tone: 'red', icon: AlertTriangle, filter: 'Atrasados' },
+          { label: 'Vencem hoje', value: '5', tone: 'orange', icon: Clock3, filter: 'Vence Hoje' },
+          { label: 'Próx. 5 dias', value: '22', tone: 'green', icon: CalendarDays, filter: 'Próximos 5 dias' },
+          { label: 'Aguardando retorno', value: '38', tone: 'purple', icon: RotateCcw, filter: 'Aguardando retorno' },
+          { label: 'Para assinatura', value: '7', tone: 'sky', icon: PenLine, filter: 'Para Assinatura' }
+        ].map((card) => {
+          const Icon = card.icon;
+          return <button className={`management-metric management-metric--${card.tone}`} key={card.label} onClick={() => handleSelecionarCard(card.filter)} type="button">
+            <span className="management-metric__icon"><Icon size={21} /></span>
+            <span className="management-metric__copy"><small>{card.label}</small><strong>{card.value}</strong><em>Ver processos <span>→</span></em></span>
+          </button>;
+        })}
+      </div>
+
+      <nav className="management-tabs" aria-label="Situação dos processos">
+        {[
+          ['Todos', ClipboardList, 'Total de Processos'], ['Atrasados', AlertTriangle, 'Atrasados'], ['Vence hoje', Clock3, 'Vence Hoje'],
+          ['Próximos 5 dias', CalendarDays, 'Próximos 5 dias'], ['Aguardando retorno', RotateCcw, 'Aguardando retorno'], ['Para assinatura', PenLine, 'Para Assinatura'], ['Concluídos', CheckCircle2, 'Concluídos']
+        ].map(([label, Icon, filter]) => <button className={filtroAtivo === filter || (!filtroAtivo && filter === 'Total de Processos') ? 'is-active' : ''} key={label as string} onClick={() => setFiltroAtivo(filter as string === 'Total de Processos' ? null : filter as string)} type="button"><Icon size={16} />{label}</button>)}
+      </nav>
+
+      <section className="management-table-card">
+        <header><h2>Processos que exigem atenção</h2></header>
+        <div className="management-table-wrap"><table className="management-table"><thead><tr><th>Prioridade</th><th>Processo SEI</th><th>Assunto</th><th>Ente</th><th>Situação</th><th>Prazo</th><th>Dias <Info size={12} /></th><th>Pendências</th><th aria-label="Abrir" /></tr></thead><tbody>
+          {processosVisiveis.map((processo) => <tr key={processo.id}>
+            <td><span className={`management-priority management-priority--${getCriticidadeVariant(processo.criticidade)}`} /></td>
+            <td className="management-table__sei">{processo.numeroSei}</td><td>{processo.assunto}</td><td>{processo.orgao.replace('Secretaria de ', '')}</td>
+            <td><span className={`management-status management-status--${getCriticidadeVariant(processo.criticidade)}`}>{processo.criticidade === 'Atrasado' ? 'Aguardando retorno' : processo.situacao}</span></td>
+            <td>{processo.prazoFinal}</td><td className={getDiasRestantesClass(processo.diasRestantes)}>{processo.diasRestantes.replace(' dias', '').replace(' dia', '')}</td><td className="management-table__pending">{processo.criticidade === 'OK' ? '—' : processo.orgao.split(' ')[0].toUpperCase()}</td><td className="management-table__open">›</td>
+          </tr>)}
+        </tbody></table></div>
+        <footer className="management-table__footer"><span>Mostrando 1 a {processosVisiveis.length} de 127 processos</span><button type="button">10 por página <ChevronDown size={13} /></button><span>‹</span><b>1</b><span>2</span><span>3</span><span>...</span><span>13</span><span>›</span></footer>
+      </section>
+
+      <div className="management-note"><Info size={15} /> O cálculo de dias considera o prazo final do processo. Clique em um processo para ver detalhes e pendências das unidades.</div>
+
+      <div className="management-legacy" aria-hidden="true">
+      <div className="process-form__back">← <span>Voltar para Processos</span></div>
+      <div className="process-form__back">← <span>Voltar para Processos</span></div>
+      <header className="process-form__heading">
+        <div>
+          <h1>Novo processo</h1>
+          <p>Preencha as informações para cadastrar um novo processo.</p>
+        </div>
+        <div className="process-form__heading-actions">
+          <button type="button" className="process-form__cancel">Cancelar</button>
+          <button type="button" className="process-form__save">▣ <span>Salvar processo</span></button>
+        </div>
+      </header>
+
+      <div className="process-form__layout">
+        <div className="process-form__sections">
+          <section className="process-form__section">
+            <h2>1. Processo</h2>
+            <div className="process-form__grid process-form__grid--two">
+              <label className="process-form__field"><span>Número do processo SEI <b>*</b></span><input placeholder="Ex.: 00090-00012345/2026-11" /></label>
+              <label className="process-form__field"><span>Unidade responsável <b>*</b></span><button className="process-form__select" type="button">Selecione a unidade <ChevronDown size={15} /></button></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>2. Origem</h2>
+            <div className="process-form__grid process-form__grid--three">
+              <label className="process-form__field"><span>Ente <b>*</b></span><button className="process-form__select" type="button">Selecione o ente <ChevronDown size={15} /></button></label>
+              <label className="process-form__field"><span>Tipo de documento <b>*</b></span><button className="process-form__select" type="button">Selecione o tipo de documento <ChevronDown size={15} /></button></label>
+              <label className="process-form__field"><span>Número do documento de entrada <b>*</b></span><input placeholder="Informe o número do documento" /></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>3. Assunto</h2>
+            <div className="process-form__grid process-form__grid--subject">
+              <label className="process-form__field"><span>Tipo de assunto <b>*</b></span><button className="process-form__select" type="button">Selecione o tipo de assunto <ChevronDown size={15} /></button></label>
+              <label className="process-form__field"><span>Assunto <b>*</b></span><textarea placeholder="Descreva o assunto do processo" maxLength={1000} /></label>
+              <label className="process-form__field"><span>Processo especial <Info size={13} /></span><button className="process-form__select" type="button">Não <ChevronDown size={15} /></button></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>4. Controle de prazo</h2>
+            <div className="process-form__grid process-form__grid--two">
+              <label className="process-form__field"><span>Data de entrada <b>*</b></span><div className="process-form__input-icon"><input value="28/05/2025" readOnly /><CalendarDays size={16} /></div></label>
+              <label className="process-form__field"><span>Prazo final <b>*</b></span><div className="process-form__input-icon"><input placeholder="Selecione a data" readOnly /><CalendarDays size={16} /></div></label>
+            </div>
+            <label className="process-form__field process-form__field--notes"><span>Observações</span><textarea placeholder="Informações complementares sobre o processo (opcional)" maxLength={1000} /></label>
+          </section>
+        </div>
+
+        <aside className="process-form__summary">
+          <h2>Resumo do processo</h2>
+          {['Número do processo SEI', 'Unidade responsável', 'Ente', 'Tipo de documento', 'Nº do documento', 'Tipo de assunto', 'Assunto', 'Especial', 'Data de entrada', 'Prazo final', 'Observações'].map((label) => (
+            <div className="process-form__summary-row" key={label}><span>{label}</span><strong>{label === 'Número do processo SEI' ? (processosExibicao[0]?.numeroSei || '—') : '—'}</strong></div>
+          ))}
+          <div className="process-form__notice"><Info size={16} /><span>Após salvar, o processo será criado com a situação <b>RECEBIDO</b>. Você poderá ajustar os dados e fazer distribuições.</span></div>
+        </aside>
+      </div>
+
+      {/* The legacy table remains below for the existing process actions and is hidden in this presentation. */}
       <div className="dashboard-summary">
         {resumoCards.map((card) => {
           const Icon = card.icone;
@@ -563,6 +685,8 @@ export const Dashboard: React.FC = () => {
           </table>
         </div>
       </section>
+
+      </div>
 
       {processoParaExcluir && (
         <div className="dashboard-delete-modal__overlay" role="presentation" onClick={cancelarExclusao}>

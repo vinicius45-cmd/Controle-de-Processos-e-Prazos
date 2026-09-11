@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Popup from '../components/Popup';
 import { Button } from '../components/Button';
+import EnteService from '../services/EnteService';
+import UnidadeService from '../services/UnidadeService';
+import { Ente } from '../types';
+import { Unidade } from '../types';
 import '../styles/Administracao.css';
 
-type TabAdministracao = 'usuarios' | 'configuracoes' | 'permissoes';
+type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'configuracoes' | 'permissoes';
 
 type PerfilAcesso = 'admin' | 'analista' | 'visualizador';
 
 type StatusUsuario = 'ativo' | 'inativo';
+
+type FormEnte = Pick<Ente, 'nmEnte' | 'sgEnte'>;
+type FormUnidade = Pick<Unidade, 'nmUnidade' | 'sgUnidade' | 'idUnidadeSuperior'>;
 
 interface UsuarioAdmin {
   id: string;
@@ -101,6 +108,41 @@ const Administracao: React.FC = () => {
     { id: 'sif-validador', nome: 'Validadores', descricao: 'Permite acessar a lista de validadores.', nivel: 'LEITURA' as const }
   ]);
   const [permissoesSalvas, setPermissoesSalvas] = useState(false);
+  const [entes, setEntes] = useState<Ente[]>([]);
+  const [entesLoading, setEntesLoading] = useState(false);
+  const [enteFiltro, setEnteFiltro] = useState('');
+  const [enteFormAberto, setEnteFormAberto] = useState(false);
+  const [enteEditando, setEnteEditando] = useState<Ente | null>(null);
+  const [enteForm, setEnteForm] = useState<FormEnte>({ nmEnte: '', sgEnte: '' });
+  const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [unidadesLoading, setUnidadesLoading] = useState(false);
+  const [unidadeFiltro, setUnidadeFiltro] = useState('');
+  const [unidadeFormAberto, setUnidadeFormAberto] = useState(false);
+  const [unidadeEditando, setUnidadeEditando] = useState<Unidade | null>(null);
+  const [unidadeForm, setUnidadeForm] = useState<FormUnidade>({ nmUnidade: '', sgUnidade: '', idUnidadeSuperior: null });
+
+  const carregarEntes = async (filtro = enteFiltro): Promise<void> => {
+    setEntesLoading(true);
+    try {
+      setEntes(await EnteService.listar(filtro, false));
+    } finally {
+      setEntesLoading(false);
+    }
+  };
+
+  const carregarUnidades = async (filtro = unidadeFiltro): Promise<void> => {
+    setUnidadesLoading(true);
+    try {
+      setUnidades(await UnidadeService.listar(filtro, false));
+    } finally {
+      setUnidadesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void carregarEntes('');
+    void carregarUnidades('');
+  }, []);
 
   const handleToggle = (field: keyof ConfiguracaoSistema): void => {
     setConfiguracoes((current) => ({
@@ -135,6 +177,75 @@ const Administracao: React.FC = () => {
     setUsuarioParaExcluir(null);
     setConfiguracoesSalvas(false);
     setPermissoesSalvas(false);
+    setEnteFormAberto(false);
+    setEnteEditando(null);
+    setUnidadeFormAberto(false);
+    setUnidadeEditando(null);
+  };
+
+  const abrirNovoEnte = (): void => {
+    setEnteEditando(null);
+    setEnteForm({ nmEnte: '', sgEnte: '' });
+    setEnteFormAberto(true);
+  };
+
+  const abrirEdicaoEnte = (ente: Ente): void => {
+    setEnteEditando(ente);
+    setEnteForm({ nmEnte: ente.nmEnte, sgEnte: ente.sgEnte });
+    setEnteFormAberto(true);
+  };
+
+  const salvarEnte = async (): Promise<void> => {
+    const nmEnte = enteForm.nmEnte.trim();
+    const sgEnte = enteForm.sgEnte.trim().toUpperCase();
+    if (!nmEnte || !sgEnte) {
+      window.alert('Informe o nome e a sigla do ente.');
+      return;
+    }
+
+    if (enteEditando) {
+      await EnteService.atualizar(enteEditando.idEnte, { nmEnte, sgEnte });
+    } else {
+      await EnteService.cadastrar({ nmEnte, sgEnte });
+    }
+    setEnteFormAberto(false);
+    setEnteEditando(null);
+    await carregarEntes();
+  };
+
+  const alternarStatusEnte = async (ente: Ente): Promise<void> => {
+    await EnteService.alterarStatus(ente.idEnte, ente.blAtivo === 'S' ? 'N' : 'S');
+    await carregarEntes();
+  };
+
+  const abrirNovaUnidade = (): void => {
+    setUnidadeEditando(null);
+    setUnidadeForm({ nmUnidade: '', sgUnidade: '', idUnidadeSuperior: null });
+    setUnidadeFormAberto(true);
+  };
+
+  const abrirEdicaoUnidade = (unidade: Unidade): void => {
+    setUnidadeEditando(unidade);
+    setUnidadeForm({ nmUnidade: unidade.nmUnidade, sgUnidade: unidade.sgUnidade, idUnidadeSuperior: unidade.idUnidadeSuperior ?? null });
+    setUnidadeFormAberto(true);
+  };
+
+  const salvarUnidade = async (): Promise<void> => {
+    const dados: FormUnidade = { ...unidadeForm, nmUnidade: unidadeForm.nmUnidade.trim(), sgUnidade: unidadeForm.sgUnidade.trim().toUpperCase() };
+    if (!dados.nmUnidade || !dados.sgUnidade) {
+      window.alert('Informe o nome e a sigla da unidade.');
+      return;
+    }
+    if (unidadeEditando) await UnidadeService.atualizar(unidadeEditando.idUnidade, dados);
+    else await UnidadeService.cadastrar(dados);
+    setUnidadeFormAberto(false);
+    setUnidadeEditando(null);
+    await carregarUnidades();
+  };
+
+  const alternarStatusUnidade = async (unidade: Unidade): Promise<void> => {
+    await UnidadeService.alterarStatus(unidade.idUnidade, unidade.blAtivo === 'S' ? 'N' : 'S');
+    await carregarUnidades();
   };
 
   const abrirFormularioNovo = (): void => {
@@ -226,9 +337,21 @@ const Administracao: React.FC = () => {
     <section className="administracao-page" aria-label="Administração">
       <div className="administracao-header-row">
         <h1>Administração</h1>
-        <button type="button" className="administracao-button administracao-button--primary" onClick={abrirFormularioNovo}>
-          + Novo Usuário
-        </button>
+        {abaAtiva === 'usuarios' && (
+          <button type="button" className="administracao-button administracao-button--primary" onClick={abrirFormularioNovo}>
+            + Novo Usuário
+          </button>
+        )}
+        {abaAtiva === 'entes' && (
+          <button type="button" className="administracao-button administracao-button--primary" onClick={abrirNovoEnte}>
+            + Novo Ente
+          </button>
+        )}
+        {abaAtiva === 'unidades' && (
+          <button type="button" className="administracao-button administracao-button--primary" onClick={abrirNovaUnidade}>
+            + Nova Unidade
+          </button>
+        )}
       </div>
 
       <div className="administracao-tabs" role="tablist" aria-label="Sub-abas de administração">
@@ -239,6 +362,17 @@ const Administracao: React.FC = () => {
           aria-selected={abaAtiva === 'usuarios'}
         >
           Usuários do Sistema
+        </button>
+        <button
+          type="button"
+          className={`administracao-tab ${abaAtiva === 'entes' ? 'administracao-tab--active' : ''}`}
+          onClick={() => handleSelectAba('entes')}
+          aria-selected={abaAtiva === 'entes'}
+        >
+          Entes
+        </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'unidades' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('unidades')} aria-selected={abaAtiva === 'unidades'}>
+          Unidades
         </button>
         <button
           type="button"
@@ -409,6 +543,134 @@ const Administracao: React.FC = () => {
             <p style={{ marginTop: '0.75rem' }}>Esta ação não pode ser desfeita.</p>
           </Popup>
         </>
+      )}
+
+      {abaAtiva === 'entes' && (
+        <div className="administracao-table-card">
+          <div className="administracao-catalog-toolbar">
+            <input
+              className="administracao-form-input"
+              type="search"
+              value={enteFiltro}
+              onChange={(event) => setEnteFiltro(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') void carregarEntes();
+              }}
+              placeholder="Pesquisar por nome ou sigla"
+            />
+            <button
+              type="button"
+              className="administracao-button administracao-button--secondary"
+              onClick={() => void carregarEntes()}
+            >
+              Pesquisar
+            </button>
+          </div>
+
+          {enteFormAberto && (
+            <div className="administracao-form-card administracao-form-card--inline">
+              <div className="administracao-form-header">
+                <div>
+                  <p className="administracao-form-subtitle">Catálogo de entes</p>
+                  <h2>{enteEditando ? 'Editar ente' : 'Cadastrar ente'}</h2>
+                </div>
+                <button type="button" className="administracao-icon-button" onClick={() => setEnteFormAberto(false)}>
+                  Cancelar
+                </button>
+              </div>
+              <div className="administracao-form-grid">
+                <div className="administracao-form-row">
+                  <label className="administracao-form-label" htmlFor="nmEnte">Nome do ente</label>
+                  <input
+                    id="nmEnte"
+                    className="administracao-form-input"
+                    value={enteForm.nmEnte}
+                    onChange={(event) => setEnteForm((current) => ({ ...current, nmEnte: event.target.value }))}
+                    placeholder="Ex.: Tribunal de Contas do Distrito Federal"
+                  />
+                </div>
+                <div className="administracao-form-row">
+                  <label className="administracao-form-label" htmlFor="sgEnte">Sigla</label>
+                  <input
+                    id="sgEnte"
+                    className="administracao-form-input"
+                    maxLength={30}
+                    value={enteForm.sgEnte}
+                    onChange={(event) => setEnteForm((current) => ({ ...current, sgEnte: event.target.value }))}
+                    placeholder="Ex.: TCDF"
+                  />
+                </div>
+              </div>
+              <div className="administracao-form-actions">
+                <button type="button" className="administracao-button administracao-button--secondary" onClick={() => setEnteFormAberto(false)}>
+                  Cancelar
+                </button>
+                <button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvarEnte()}>
+                  Salvar ente
+                </button>
+              </div>
+            </div>
+          )}
+
+          <table className="administracao-table">
+            <thead>
+              <tr><th>Nome</th><th>Sigla</th><th>Status</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+              {entesLoading ? (
+                <tr><td colSpan={4}>Carregando entes...</td></tr>
+              ) : entes.length === 0 ? (
+                <tr><td colSpan={4}>Nenhum ente encontrado.</td></tr>
+              ) : entes.map((ente) => (
+                <tr key={ente.idEnte}>
+                  <td><strong>{ente.nmEnte}</strong></td>
+                  <td>{ente.sgEnte}</td>
+                  <td>
+                    <span className={`administracao-status administracao-status--${ente.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>
+                      {ente.blAtivo === 'S' ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td className="administracao-actions-cell">
+                    <button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoEnte(ente)}>Editar</button>
+                    <button
+                      type="button"
+                      className={`administracao-icon-button ${ente.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`}
+                      onClick={() => void alternarStatusEnte(ente)}
+                    >
+                      {ente.blAtivo === 'S' ? 'Inativar' : 'Ativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {abaAtiva === 'unidades' && (
+        <div className="administracao-table-card">
+          <div className="administracao-catalog-toolbar">
+            <input className="administracao-form-input" type="search" value={unidadeFiltro} onChange={(event) => setUnidadeFiltro(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void carregarUnidades(); }} placeholder="Pesquisar por nome ou sigla" />
+            <button type="button" className="administracao-button administracao-button--secondary" onClick={() => void carregarUnidades()}>Pesquisar</button>
+          </div>
+          {unidadeFormAberto && (
+            <div className="administracao-form-card administracao-form-card--inline">
+              <div className="administracao-form-header">
+                <div><p className="administracao-form-subtitle">Organização</p><h2>{unidadeEditando ? 'Editar unidade' : 'Cadastrar unidade'}</h2></div>
+                <button type="button" className="administracao-icon-button" onClick={() => setUnidadeFormAberto(false)}>Cancelar</button>
+              </div>
+              <div className="administracao-form-grid">
+                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="nmUnidade">Nome da unidade</label><input id="nmUnidade" className="administracao-form-input" value={unidadeForm.nmUnidade} onChange={(event) => setUnidadeForm((current) => ({ ...current, nmUnidade: event.target.value }))} /></div>
+                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="sgUnidade">Sigla</label><input id="sgUnidade" className="administracao-form-input" maxLength={30} value={unidadeForm.sgUnidade} onChange={(event) => setUnidadeForm((current) => ({ ...current, sgUnidade: event.target.value }))} /></div>
+                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="idUnidadeSuperior">Unidade superior</label><select id="idUnidadeSuperior" className="administracao-form-select" value={unidadeForm.idUnidadeSuperior ?? ''} onChange={(event) => setUnidadeForm((current) => ({ ...current, idUnidadeSuperior: event.target.value ? Number(event.target.value) : null }))}><option value="">Raiz da estrutura</option>{unidades.filter((item) => item.idUnidade !== unidadeEditando?.idUnidade).map((item) => <option key={item.idUnidade} value={item.idUnidade}>{item.sgUnidade} - {item.nmUnidade}</option>)}</select></div>
+              </div>
+              <div className="administracao-form-actions"><button type="button" className="administracao-button administracao-button--secondary" onClick={() => setUnidadeFormAberto(false)}>Cancelar</button><button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvarUnidade()}>Salvar unidade</button></div>
+            </div>
+          )}
+          <table className="administracao-table"><thead><tr><th>Nome</th><th>Sigla</th><th>Unidade superior</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+            {unidadesLoading ? <tr><td colSpan={5}>Carregando unidades...</td></tr> : unidades.length === 0 ? <tr><td colSpan={5}>Nenhuma unidade encontrada.</td></tr> : unidades.map((unidade) => <tr key={unidade.idUnidade}><td><strong>{unidade.nmUnidade}</strong></td><td>{unidade.sgUnidade}</td><td>{unidades.find((item) => item.idUnidade === unidade.idUnidadeSuperior)?.sgUnidade ?? 'Raiz'}</td><td><span className={`administracao-status administracao-status--${unidade.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{unidade.blAtivo === 'S' ? 'Ativa' : 'Inativa'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoUnidade(unidade)}>Editar</button><button type="button" className={`administracao-icon-button ${unidade.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`} onClick={() => void alternarStatusUnidade(unidade)}>{unidade.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}
+          </tbody></table>
+        </div>
       )}
 
       {abaAtiva === 'configuracoes' && (
