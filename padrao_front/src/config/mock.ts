@@ -1,4 +1,4 @@
-import { CdpUsuario, Ente, Operadora, Unidade } from '../types';
+import { CdpUsuario, Ente, Operadora, TipoAssunto, TipoDocumento, Unidade } from '../types';
 
 export const MOCK_CDP_USERS: CdpUsuario[] = [
   {
@@ -157,4 +157,19 @@ export const localMockUnidades: Unidade[] = [
   { idUnidade: 3, nmUnidade: 'Subsecretaria de Fiscalização', sgUnidade: 'SUFISA', blAtivo: 'S', idUnidadeSuperior: null },
   { idUnidade: 4, nmUnidade: 'Coordenação de Processos da SUOP', sgUnidade: 'CP-SUOP', blAtivo: 'S', idUnidadeSuperior: 1 },
   { idUnidade: 5, nmUnidade: 'Coordenação de Processos da SUFISA', sgUnidade: 'CP-SUFISA', blAtivo: 'S', idUnidadeSuperior: 3 }
+];
+
+export const localMockTiposAssunto: TipoAssunto[] = [
+  { idTipoAssunto: 1, idUnidade: 1, nmTipoAssunto: 'Ofício', blAtivo: 'S' },
+  { idTipoAssunto: 2, idUnidade: 1, nmTipoAssunto: 'Requerimento', blAtivo: 'S' },
+  { idTipoAssunto: 3, idUnidade: 3, nmTipoAssunto: 'Denúncia', blAtivo: 'S' },
+  { idTipoAssunto: 4, idUnidade: 3, nmTipoAssunto: 'Indicação', blAtivo: 'S' },
+  { idTipoAssunto: 5, idUnidade: 2, nmTipoAssunto: 'Despacho', blAtivo: 'S' }
+];
+
+export const localMockTiposDocumento: TipoDocumento[] = [
+  { idTipoDocumento: 1, nmTipoDocumento: 'Ofício', blAtivo: 'S' },
+  { idTipoDocumento: 2, nmTipoDocumento: 'Memorando', blAtivo: 'S' },
+  { idTipoDocumento: 3, nmTipoDocumento: 'Despacho', blAtivo: 'S' },
+  { idTipoDocumento: 4, nmTipoDocumento: 'Resposta SEI', blAtivo: 'S' }
 ];

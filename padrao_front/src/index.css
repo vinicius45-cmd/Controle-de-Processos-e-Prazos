@@ -175,6 +175,15 @@ body {
   padding: 26px 28px 24px;
 }
 
+.app-shell__workspace:has(.dashboard-page--management) > .app-header,
+.app-shell__workspace:has(.dashboard-page--management) > .app-footer {
+  display: none;
+}
+
+.app-content:has(.dashboard-page--management) {
+  padding: 0;
+}
+
 .app-content__empty {
   background: var(--semob-surface);
   border: 1px solid var(--semob-border);
@@ -571,9 +580,9 @@ body {
   color: #152b4c;
   cursor: pointer;
   display: flex;
-  height: 34px;
+  height: 32px;
   justify-content: center;
-  width: 34px;
+  width: 32px;
 }
 
 .app-header__menu-button:hover,
@@ -613,9 +622,16 @@ body {
 }
 
 .app-header__actions {
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
   min-width: 0;
+}
+
+.app-header__action-divider {
+  background: #e3e8ef;
+  display: block;
+  height: 25px;
+  width: 1px;
 }
 
 .app-header__profile {
@@ -797,6 +813,7 @@ body {
   color: #172641;
   gap: 15px;
   min-height: 100%;
+  padding: 24px 28px 18px;
 }
 
 .dashboard-page--management .management-legacy {

@@ -3,6 +3,8 @@ import { CalendarDays, ChevronDown, ChevronRight, Filter, Plus, Search } from 'l
 import { useApp } from '../app/AppProvider';
 import { useEntes } from '../hooks/useEntes';
 import { useUnidades } from '../hooks/useUnidades';
+import { useTiposProcesso } from '../hooks/useTiposProcesso';
+import ProcessoService from '../services/ProcessoService';
 import { FormCadastro, ResumoProcesso } from '../types';
 import '../styles/CadastrodeProcesso.css';
 
@@ -12,22 +14,13 @@ const CadastrodeProcesso: React.FC = () => {
   const { dados: unidades, loading: carregandoUnidades } = useUnidades();
   const modoEdicao = Boolean(processoSelecionado && modoVisualizacaoProcesso === 'editar');
 
-  // Constantes para opções dos SELECTs
-  const TIPOS_ASSUNTO = [
-    'Ofício',
-    'Requerimento',
-    'Carta',
-    'Indicação',
-    'Despacho',
-    'Memorando',
-  ];
-
   // Estados do formulário
   const [form, setForm] = useState<FormCadastro>({
     processoINCRA: '',
     requerimento: '',
     assunto: '',
     assuntoTipo: '',
+    idTipoAssunto: null,
     destinatario: '',
     idUnidade: null,
     solicitudesInformacao: [],
@@ -39,10 +32,12 @@ const CadastrodeProcesso: React.FC = () => {
     situacaoProcesso: '',
     responsavel: '',
     documentoSEI: '',
+    idTipoDocumento: null,
     especial: false,
     filtroRespostas: false,
     observacao: '',
   });
+  const { tiposAssunto, tiposDocumento } = useTiposProcesso(form.idUnidade);
 
   const [resumo, setResumo] = useState<ResumoProcesso>({
     status: 'OK',
@@ -162,7 +157,7 @@ const CadastrodeProcesso: React.FC = () => {
     setMostrarResumo(true);
   }, [form.dataEntrada, form.prazoFinal, form.situacaoProcesso, form.responsavel]);
   useEffect(() => {
-    carregarProcessosSalvos();
+    void carregarProcessosSalvos();
   }, []);
 
   useEffect(() => {
@@ -194,28 +189,11 @@ const CadastrodeProcesso: React.FC = () => {
     setProcessosFiltrados(filtrados);
   }, [busca, processosSalvos, form.filtroRespostas]);
 
-  // Salva processos no localStorage (simula arquivo .txt)
-  const salvarProcessoNoStorage = (processo: FormCadastro): void => {
-    const id = processo.id || Date.now().toString();
-    const processoComId = { ...processo, id };
-
-    const processos = processosSalvos.filter((p) => p.id !== id);
-    processos.push(processoComId);
-
-    localStorage.setItem('processos_cadastrados', JSON.stringify(processos));
-    setProcessosSalvos(processos);
-  };
-
-  // Carrega processos do localStorage
-  const carregarProcessosSalvos = (): void => {
-    const procesosArmazenados = localStorage.getItem('processos_cadastrados');
-    if (procesosArmazenados) {
-      try {
-        const procesos = JSON.parse(procesosArmazenados);
-        setProcessosSalvos(procesos);
-      } catch (erro) {
-        console.error('Erro ao carregar processos:', erro);
-      }
+  const carregarProcessosSalvos = async (): Promise<void> => {
+    try {
+      setProcessosSalvos(await ProcessoService.listar());
+    } catch (erro) {
+      console.error('Erro ao carregar processos:', erro);
     }
   };
 
@@ -266,7 +244,7 @@ const CadastrodeProcesso: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     // Valida os campos obrigatórios
@@ -274,6 +252,7 @@ const CadastrodeProcesso: React.FC = () => {
       !form.assuntoTipo ||
       !form.idEnte ||
       !form.idUnidade ||
+      !form.idTipoAssunto ||
       !form.destinatario ||
       !form.dataEntrada ||
       !form.prazoFinal
@@ -287,8 +266,7 @@ const CadastrodeProcesso: React.FC = () => {
       id: form.id || processoSelecionado?.id || Date.now().toString(),
     };
 
-    // Salva o processo
-    salvarProcessoNoStorage(processoParaSalvar);
+    await ProcessoService.salvar(processoParaSalvar);
     alert(modoEdicao ? 'Processo atualizado com sucesso!' : 'Processo cadastrado com sucesso!');
 
     definirProcessoSelecionado(null, null);
@@ -301,6 +279,7 @@ const CadastrodeProcesso: React.FC = () => {
       requerimento: '',
       assunto: '',
       assuntoTipo: '',
+      idTipoAssunto: null,
       destinatario: '',
       idUnidade: null,
       solicitudesInformacao: [],
@@ -312,6 +291,7 @@ const CadastrodeProcesso: React.FC = () => {
       situacaoProcesso: '',
       responsavel: '',
       documentoSEI: '',
+      idTipoDocumento: null,
       especial: false,
       filtroRespostas: false,
       observacao: '',
@@ -330,10 +310,10 @@ const CadastrodeProcesso: React.FC = () => {
     setMostrarListaProcessos(false);
   };
 
-  const deletarProcesso = (id: string | undefined): void => {
+  const deletarProcesso = async (id: string | undefined): Promise<void> => {
     if (!id) return;
     const processos = processosSalvos.filter((p) => p.id !== id);
-    localStorage.setItem('processos_cadastrados', JSON.stringify(processos));
+    await ProcessoService.excluir(id);
     setProcessosSalvos(processos);
     alert('Processo deletado com sucesso!');
   };
@@ -543,15 +523,15 @@ const CadastrodeProcesso: React.FC = () => {
                 </label>
                 <select
                   id="assuntoTipo"
-                  name="assuntoTipo"
-                  value={form.assuntoTipo}
+                  name="idTipoAssunto"
+                  value={form.idTipoAssunto ?? ''}
                   onChange={handleInputChange}
                   required
                 >
                   <option value="">Selecione um tipo de documento</option>
-                  {TIPOS_ASSUNTO.map((tipo) => (
-                    <option key={tipo} value={tipo}>
-                      {tipo}
+                  {tiposAssunto.map((tipo) => (
+                    <option key={tipo.idTipoAssunto} value={tipo.idTipoAssunto}>
+                      {tipo.nmTipoAssunto}
                     </option>
                   ))}
                 </select>
@@ -742,13 +722,16 @@ const CadastrodeProcesso: React.FC = () => {
                 </label>
                 <select
                   id="documentoSEI"
-                  name="documentoSEI"
-                  value={form.documentoSEI}
+                  name="idTipoDocumento"
+                  value={form.idTipoDocumento ?? ''}
                   onChange={handleInputChange}
                 >
                   <option value="">Selecione o documento</option>
-                  <option value="doc-001">Documento 001</option>
-                  <option value="doc-002">Documento 002</option>
+                  {tiposDocumento.map((tipo) => (
+                    <option key={tipo.idTipoDocumento} value={tipo.idTipoDocumento}>
+                      {tipo.nmTipoDocumento}
+                    </option>
+                  ))}
                 </select>
               </div>
 

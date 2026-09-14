@@ -33,6 +33,19 @@ export interface Unidade {
   dtFimVigencia?: string | null;
 }
 
+export interface TipoAssunto {
+  idTipoAssunto: number;
+  idUnidade: number;
+  nmTipoAssunto: string;
+  blAtivo: 'S' | 'N';
+}
+
+export interface TipoDocumento {
+  idTipoDocumento: number;
+  nmTipoDocumento: string;
+  blAtivo: 'S' | 'N';
+}
+
 export interface Usuario {
   id: string; // Nickname
   idUsuario?: number;
@@ -51,6 +64,7 @@ export interface FormCadastro {
   requerimento: string;
   assunto: string;
   assuntoTipo: string;
+  idTipoAssunto?: number | null;
   destinatario: string;
   idUnidade?: number | null;
   solicitudesInformacao: string[];
@@ -63,9 +77,18 @@ export interface FormCadastro {
   situacaoProcesso: string;
   responsavel: string;
   documentoSEI: string;
+  idTipoDocumento?: number | null;
   especial: boolean;
   filtroRespostas: boolean;
   observacao: string;
+}
+
+export interface Processo extends FormCadastro {
+  idProcesso: number | string;
+  idUsuarioCriacao?: number;
+  idUsuarioAtualizacao?: number;
+  dtCriacao?: string;
+  dtAtualizacao?: string;
 }
 
 export interface ResumoProcesso {

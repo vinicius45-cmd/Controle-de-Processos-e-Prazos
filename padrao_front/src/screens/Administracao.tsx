@@ -5,9 +5,12 @@ import EnteService from '../services/EnteService';
 import UnidadeService from '../services/UnidadeService';
 import { Ente } from '../types';
 import { Unidade } from '../types';
+import { TipoAssunto, TipoDocumento } from '../types';
+import TipoAssuntoService from '../services/TipoAssuntoService';
+import TipoDocumentoService from '../services/TipoDocumentoService';
 import '../styles/Administracao.css';
 
-type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'configuracoes' | 'permissoes';
+type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'tipos-assunto' | 'tipos-documento' | 'configuracoes' | 'permissoes';
 
 type PerfilAcesso = 'admin' | 'analista' | 'visualizador';
 
@@ -120,6 +123,13 @@ const Administracao: React.FC = () => {
   const [unidadeFormAberto, setUnidadeFormAberto] = useState(false);
   const [unidadeEditando, setUnidadeEditando] = useState<Unidade | null>(null);
   const [unidadeForm, setUnidadeForm] = useState<FormUnidade>({ nmUnidade: '', sgUnidade: '', idUnidadeSuperior: null });
+  const [tiposAssunto, setTiposAssunto] = useState<TipoAssunto[]>([]);
+  const [tiposDocumento, setTiposDocumento] = useState<TipoDocumento[]>([]);
+  const [tipoFiltro, setTipoFiltro] = useState('');
+  const [tipoFormAberto, setTipoFormAberto] = useState(false);
+  const [tipoEditando, setTipoEditando] = useState<TipoAssunto | TipoDocumento | null>(null);
+  const [tipoNome, setTipoNome] = useState('');
+  const [tipoUnidade, setTipoUnidade] = useState<number | null>(null);
 
   const carregarEntes = async (filtro = enteFiltro): Promise<void> => {
     setEntesLoading(true);
@@ -142,7 +152,17 @@ const Administracao: React.FC = () => {
   useEffect(() => {
     void carregarEntes('');
     void carregarUnidades('');
+    void carregarTipos();
   }, []);
+
+  const carregarTipos = async (): Promise<void> => {
+    const [assuntos, documentos] = await Promise.all([
+      TipoAssuntoService.listar(undefined, tipoFiltro, false),
+      TipoDocumentoService.listar(tipoFiltro, false)
+    ]);
+    setTiposAssunto(assuntos);
+    setTiposDocumento(documentos);
+  };
 
   const handleToggle = (field: keyof ConfiguracaoSistema): void => {
     setConfiguracoes((current) => ({
@@ -181,6 +201,8 @@ const Administracao: React.FC = () => {
     setEnteEditando(null);
     setUnidadeFormAberto(false);
     setUnidadeEditando(null);
+    setTipoFormAberto(false);
+    setTipoEditando(null);
   };
 
   const abrirNovoEnte = (): void => {
@@ -246,6 +268,46 @@ const Administracao: React.FC = () => {
   const alternarStatusUnidade = async (unidade: Unidade): Promise<void> => {
     await UnidadeService.alterarStatus(unidade.idUnidade, unidade.blAtivo === 'S' ? 'N' : 'S');
     await carregarUnidades();
+  };
+
+  const abrirNovoTipo = (): void => {
+    setTipoEditando(null);
+    setTipoNome('');
+    setTipoUnidade(abaAtiva === 'tipos-assunto' ? (unidades[0]?.idUnidade ?? null) : null);
+    setTipoFormAberto(true);
+  };
+
+  const abrirEdicaoTipo = (tipo: TipoAssunto | TipoDocumento): void => {
+    setTipoEditando(tipo);
+    setTipoNome('nmTipoAssunto' in tipo ? tipo.nmTipoAssunto : tipo.nmTipoDocumento);
+    setTipoUnidade('idUnidade' in tipo ? tipo.idUnidade : null);
+    setTipoFormAberto(true);
+  };
+
+  const salvarTipo = async (): Promise<void> => {
+    const nome = tipoNome.trim();
+    if (!nome || (abaAtiva === 'tipos-assunto' && !tipoUnidade)) {
+      window.alert('Preencha o nome e a unidade do tipo de assunto.');
+      return;
+    }
+    if (abaAtiva === 'tipos-assunto') {
+      const dados = { nmTipoAssunto: nome, idUnidade: tipoUnidade as number };
+      if (tipoEditando && 'idTipoAssunto' in tipoEditando) await TipoAssuntoService.atualizar(tipoEditando.idTipoAssunto, dados);
+      else await TipoAssuntoService.cadastrar(dados);
+    } else {
+      const dados = { nmTipoDocumento: nome };
+      if (tipoEditando && 'idTipoDocumento' in tipoEditando) await TipoDocumentoService.atualizar(tipoEditando.idTipoDocumento, dados);
+      else await TipoDocumentoService.cadastrar(dados);
+    }
+    setTipoFormAberto(false);
+    setTipoEditando(null);
+    await carregarTipos();
+  };
+
+  const alternarStatusTipo = async (tipo: TipoAssunto | TipoDocumento): Promise<void> => {
+    if ('idTipoAssunto' in tipo) await TipoAssuntoService.alterarStatus(tipo.idTipoAssunto, tipo.blAtivo === 'S' ? 'N' : 'S');
+    else await TipoDocumentoService.alterarStatus(tipo.idTipoDocumento, tipo.blAtivo === 'S' ? 'N' : 'S');
+    await carregarTipos();
   };
 
   const abrirFormularioNovo = (): void => {
@@ -352,6 +414,11 @@ const Administracao: React.FC = () => {
             + Nova Unidade
           </button>
         )}
+        {(abaAtiva === 'tipos-assunto' || abaAtiva === 'tipos-documento') && (
+          <button type="button" className="administracao-button administracao-button--primary" onClick={abrirNovoTipo}>
+            + Novo Cadastro
+          </button>
+        )}
       </div>
 
       <div className="administracao-tabs" role="tablist" aria-label="Sub-abas de administração">
@@ -373,6 +440,12 @@ const Administracao: React.FC = () => {
         </button>
         <button type="button" className={`administracao-tab ${abaAtiva === 'unidades' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('unidades')} aria-selected={abaAtiva === 'unidades'}>
           Unidades
+        </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'tipos-assunto' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('tipos-assunto')} aria-selected={abaAtiva === 'tipos-assunto'}>
+          Tipos de assunto
+        </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'tipos-documento' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('tipos-documento')} aria-selected={abaAtiva === 'tipos-documento'}>
+          Tipos de documento
         </button>
         <button
           type="button"
@@ -670,6 +743,26 @@ const Administracao: React.FC = () => {
           <table className="administracao-table"><thead><tr><th>Nome</th><th>Sigla</th><th>Unidade superior</th><th>Status</th><th>Ações</th></tr></thead><tbody>
             {unidadesLoading ? <tr><td colSpan={5}>Carregando unidades...</td></tr> : unidades.length === 0 ? <tr><td colSpan={5}>Nenhuma unidade encontrada.</td></tr> : unidades.map((unidade) => <tr key={unidade.idUnidade}><td><strong>{unidade.nmUnidade}</strong></td><td>{unidade.sgUnidade}</td><td>{unidades.find((item) => item.idUnidade === unidade.idUnidadeSuperior)?.sgUnidade ?? 'Raiz'}</td><td><span className={`administracao-status administracao-status--${unidade.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{unidade.blAtivo === 'S' ? 'Ativa' : 'Inativa'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoUnidade(unidade)}>Editar</button><button type="button" className={`administracao-icon-button ${unidade.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`} onClick={() => void alternarStatusUnidade(unidade)}>{unidade.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}
           </tbody></table>
+        </div>
+      )}
+
+      {(abaAtiva === 'tipos-assunto' || abaAtiva === 'tipos-documento') && (
+        <div className="administracao-table-card">
+          <div className="administracao-catalog-toolbar">
+            <input className="administracao-form-input" type="search" value={tipoFiltro} onChange={(event) => setTipoFiltro(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void carregarTipos(); }} placeholder="Pesquisar tipo" />
+            <button type="button" className="administracao-button administracao-button--secondary" onClick={() => void carregarTipos()}>Pesquisar</button>
+          </div>
+          {tipoFormAberto && (
+            <div className="administracao-form-card administracao-form-card--inline">
+              <div className="administracao-form-header"><div><p className="administracao-form-subtitle">Catálogo de processo</p><h2>{tipoEditando ? 'Editar cadastro' : 'Cadastrar tipo'}</h2></div><button type="button" className="administracao-icon-button" onClick={() => setTipoFormAberto(false)}>Cancelar</button></div>
+              <div className="administracao-form-grid">
+                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="tipoNome">Nome</label><input id="tipoNome" className="administracao-form-input" value={tipoNome} onChange={(event) => setTipoNome(event.target.value)} /></div>
+                {abaAtiva === 'tipos-assunto' && <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="tipoUnidade">Unidade</label><select id="tipoUnidade" className="administracao-form-select" value={tipoUnidade ?? ''} onChange={(event) => setTipoUnidade(event.target.value ? Number(event.target.value) : null)}><option value="">Selecione a unidade</option>{unidades.filter((item) => item.blAtivo === 'S').map((item) => <option key={item.idUnidade} value={item.idUnidade}>{item.sgUnidade} - {item.nmUnidade}</option>)}</select></div>}
+              </div>
+              <div className="administracao-form-actions"><button type="button" className="administracao-button administracao-button--secondary" onClick={() => setTipoFormAberto(false)}>Cancelar</button><button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvarTipo()}>Salvar</button></div>
+            </div>
+          )}
+          {abaAtiva === 'tipos-assunto' ? <table className="administracao-table"><thead><tr><th>Tipo de assunto</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposAssunto.map((tipo) => <tr key={tipo.idTipoAssunto}><td><strong>{tipo.nmTipoAssunto}</strong></td><td>{unidades.find((item) => item.idUnidade === tipo.idUnidade)?.sgUnidade ?? tipo.idUnidade}</td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}</tbody></table> : <table className="administracao-table"><thead><tr><th>Tipo de documento</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposDocumento.map((tipo) => <tr key={tipo.idTipoDocumento}><td><strong>{tipo.nmTipoDocumento}</strong></td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}</tbody></table>}
         </div>
       )}
 
