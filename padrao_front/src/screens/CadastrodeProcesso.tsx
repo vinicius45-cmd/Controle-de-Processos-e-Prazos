@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FormEvent, useState, useEffect } from 'react';
-import { CalendarDays, ChevronDown, ChevronRight, Filter, Plus, Search } from 'lucide-react';
+import { CalendarDays, ChevronDown, ChevronRight, Filter, Info, Plus, Save, Search } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { useEntes } from '../hooks/useEntes';
 import { useUnidades } from '../hooks/useUnidades';
@@ -171,6 +171,16 @@ const CadastrodeProcesso: React.FC = () => {
       setMostrarFormulario(true);
     }
   }, [processoSelecionado]);
+
+  useEffect(() => {
+    const voltarParaLista = () => {
+      setMostrarFormulario(false);
+      definirProcessoSelecionado(null, null);
+    };
+
+    window.addEventListener('processo:voltar-lista', voltarParaLista);
+    return () => window.removeEventListener('processo:voltar-lista', voltarParaLista);
+  }, [definirProcessoSelecionado]);
 
   // Filtra processos quando há alteração na busca ou no filtro de respostas
   useEffect(() => {
@@ -382,6 +392,80 @@ const CadastrodeProcesso: React.FC = () => {
       </section>
     );
   }
+
+  const resumoVisual = [
+    ['Número do processo SEI', form.processoINCRA],
+    ['Unidade responsável', unidades.find((unidade) => unidade.idUnidade === form.idUnidade)?.sgUnidade],
+    ['Ente', entes.find((ente) => ente.idEnte === form.idEnte)?.sgEnte],
+    ['Tipo de documento', tiposDocumento.find((tipo) => tipo.idTipoDocumento === form.idTipoDocumento)?.nmTipoDocumento],
+    ['Nº do documento', form.requerimento],
+    ['Tipo de assunto', tiposAssunto.find((tipo) => tipo.idTipoAssunto === form.idTipoAssunto)?.nmTipoAssunto],
+    ['Assunto', form.assunto],
+    ['Especial', form.especial ? 'Sim' : 'Não'],
+    ['Data de entrada', form.dataEntrada],
+    ['Prazo final', form.prazoFinal],
+    ['Observações', form.observacao],
+  ];
+
+  return (
+    <section className="dashboard-page--process-form process-form-screen" aria-label="Novo processo">
+      <header className="process-form__heading">
+        <div>
+          <h1>{modoEdicao ? 'Editar processo' : 'Novo processo'}</h1>
+          <p>Preencha as informações para cadastrar um novo processo.</p>
+        </div>
+        <div className="process-form__heading-actions">
+          <button type="button" className="process-form__cancel" onClick={handleCancel}>Cancelar</button>
+          <button type="submit" form="novo-processo-form" className="process-form__save"><Save size={16} /> <span>Salvar processo</span></button>
+        </div>
+      </header>
+
+      <form id="novo-processo-form" onSubmit={handleSubmit} className="process-form__layout">
+        <div className="process-form__sections">
+          <section className="process-form__section">
+            <h2>1. Processo</h2>
+            <div className="process-form__grid process-form__grid--two">
+              <label className="process-form__field"><span>Número do processo SEI <b>*</b></span><input name="processoINCRA" value={form.processoINCRA} onChange={handleInputChange} placeholder="Ex.: 00090-00012345/2026-11" required /></label>
+              <label className="process-form__field"><span>Unidade responsável <b>*</b></span><select name="idUnidade" value={form.idUnidade ?? ''} onChange={handleInputChange} disabled={carregandoUnidades} required><option value="">{carregandoUnidades ? 'Carregando unidades...' : 'Selecione a unidade'}</option>{unidades.map((unidade) => <option key={unidade.idUnidade} value={unidade.idUnidade}>{unidade.sgUnidade} - {unidade.nmUnidade}</option>)}</select></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>2. Origem</h2>
+            <div className="process-form__grid process-form__grid--three">
+              <label className="process-form__field"><span>Ente <b>*</b></span><select name="idEnte" value={form.idEnte ?? ''} onChange={handleInputChange} disabled={carregandoEntes} required><option value="">{carregandoEntes ? 'Carregando entes...' : 'Selecione o ente'}</option>{entes.map((ente) => <option key={ente.idEnte} value={ente.idEnte}>{ente.sgEnte} - {ente.nmEnte}</option>)}</select></label>
+              <label className="process-form__field"><span>Tipo de documento <b>*</b></span><select name="idTipoDocumento" value={form.idTipoDocumento ?? ''} onChange={handleInputChange} required><option value="">Selecione o tipo de documento</option>{tiposDocumento.map((tipo) => <option key={tipo.idTipoDocumento} value={tipo.idTipoDocumento}>{tipo.nmTipoDocumento}</option>)}</select></label>
+              <label className="process-form__field"><span>Número do documento de entrada <b>*</b></span><input name="requerimento" value={form.requerimento} onChange={handleInputChange} placeholder="Informe o número do documento" required /></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>3. Assunto</h2>
+            <div className="process-form__grid process-form__grid--subject">
+              <label className="process-form__field"><span>Tipo de assunto <b>*</b></span><select name="idTipoAssunto" value={form.idTipoAssunto ?? ''} onChange={handleInputChange} required><option value="">Selecione o tipo de assunto</option>{tiposAssunto.map((tipo) => <option key={tipo.idTipoAssunto} value={tipo.idTipoAssunto}>{tipo.nmTipoAssunto}</option>)}</select></label>
+              <label className="process-form__field"><span>Assunto <b>*</b></span><textarea name="assunto" value={form.assunto} onChange={handleInputChange} placeholder="Descreva o assunto do processo" maxLength={1000} required /></label>
+              <label className="process-form__field"><span>Processo especial <Info size={13} /></span><select name="especial" value={form.especial ? 'sim' : 'nao'} onChange={(event) => setForm((prev) => ({ ...prev, especial: event.target.value === 'sim' }))}><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+            </div>
+          </section>
+
+          <section className="process-form__section">
+            <h2>4. Controle de prazo</h2>
+            <div className="process-form__grid process-form__grid--two">
+              <label className="process-form__field"><span>Data de entrada <b>*</b></span><div className="process-form__input-icon"><input type="date" name="dataEntrada" value={form.dataEntrada} onChange={handleInputChange} required /><CalendarDays size={16} /></div></label>
+              <label className="process-form__field"><span>Prazo final <b>*</b></span><div className="process-form__input-icon"><input type="date" name="prazoFinal" value={form.prazoFinal} onChange={handleInputChange} required /><CalendarDays size={16} /></div></label>
+            </div>
+            <label className="process-form__field process-form__field--notes"><span>Observações</span><textarea name="observacao" value={form.observacao} onChange={handleInputChange} placeholder="Informações complementares sobre o processo (opcional)" maxLength={1000} /></label>
+          </section>
+        </div>
+
+        <aside className="process-form__summary">
+          <h2>Resumo do processo</h2>
+          {resumoVisual.map(([label, value]) => <div className="process-form__summary-row" key={label}><span>{label}</span><strong>{value || '—'}</strong></div>)}
+          <div className="process-form__notice"><Info size={16} /><span>Após salvar, o processo será criado com a situação <b>RECEBIDO</b>. Você poderá ajustar os dados e fazer distribuições.</span></div>
+        </aside>
+      </form>
+    </section>
+  );
 
   return (
     <div className="cadastro-container">

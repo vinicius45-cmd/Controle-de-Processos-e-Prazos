@@ -48,13 +48,28 @@ export const EnteService = {
     }
   },
 
-  async alterarStatus(idEnte: number, blAtivo: 'S' | 'N'): Promise<void> {
+  async visualizarAtivos(): Promise<void> {
     try {
-      await api.patch(`/entes/${idEnte}/status`, { blAtivo });
-    } catch {
-      const ente = localMockEntes.find((item) => item.idEnte === idEnte);
-      if (ente) ente.blAtivo = blAtivo;
-    }
+      await api.get(`/entes/ativos`);
+    } catch {}
+  },
+
+  async visualizarEntes(): Promise<void> {
+    try {
+      await api.get(`/entes`);
+    } catch {}
+  },
+
+  async visualizarIds(): Promise<void> {
+    try {
+      await api.get(`/entes/:id`);
+    } catch {}
+  },
+
+  async visualizarSiglas(): Promise<void> {
+    try {
+      await api.get(`/entes/sigla/:sigla`);
+    } catch {}
   }
 };
 

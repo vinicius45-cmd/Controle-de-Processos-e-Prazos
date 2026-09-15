@@ -184,6 +184,11 @@ body {
   padding: 0;
 }
 
+.app-content:has(.process-form-screen) {
+  background: #f7f9fc;
+  padding: 0;
+}
+
 .app-content__empty {
   background: var(--semob-surface);
   border: 1px solid var(--semob-border);
@@ -548,6 +553,23 @@ body {
 .app-header__title-group {
   gap: 12px;
   min-width: 0;
+}
+
+.process-header__back {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #0759d7;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 7px;
+  padding: 0;
+}
+
+.process-header__back:hover {
+  text-decoration: underline;
 }
 
 .app-header__eyebrow {
@@ -1135,6 +1157,7 @@ body {
   background: #f7f9fc;
   gap: 12px;
   min-height: 100%;
+  padding: 14px 16px 24px;
 }
 
 .dashboard-page--process-form > .dashboard-summary,
@@ -1297,6 +1320,30 @@ body {
 .process-form__field input::placeholder,
 .process-form__field textarea::placeholder {
   color: #9aa7ba;
+}
+
+.process-form__field select {
+  appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23405576' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 14px;
+  border: 1px solid #dce5ef;
+  border-radius: 4px;
+  color: #45536d;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 400;
+  min-height: 33px;
+  outline: 0;
+  padding: 0 32px 0 10px;
+  width: 100%;
+}
+
+.process-form__field select:focus {
+  border-color: #73a7ee;
+  box-shadow: 0 0 0 2px rgba(9, 94, 228, 0.08);
 }
 
 .process-form__select {
