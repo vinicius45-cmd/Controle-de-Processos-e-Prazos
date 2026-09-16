@@ -48,6 +48,15 @@ export const EnteService = {
     }
   },
 
+  async desativar(idEnte: number): Promise<void> {
+    try {
+      await api.patch(`/entes/${idEnte}/desativar`);
+    } catch {
+      const ente = localMockEntes.find((item) => item.idEnte === idEnte);
+      if (ente) ente.blAtivo = 'N';
+    }
+  },
+
   async visualizarAtivos(): Promise<void> {
     try {
       await api.get(`/entes/ativos`);

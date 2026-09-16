@@ -317,7 +317,7 @@ const converterParaProcesso = (form: FormCadastro, index: number): Processo => {
     criticidade,
     numeroSei: form.processoINCRA || form.requerimento || 'N/A',
     assunto: form.assunto,
-    orgao: form.orgaoOrigem,
+    orgao: form.orgaoOrigem || 'Não informado',
     responsavel: form.responsavel || 'Não atribuído',
     prazoFinal: form.prazoFinal ? formatarPrazoFinal(form.prazoFinal) : '',
     diasRestantes: diasTexto,
@@ -425,7 +425,7 @@ export const Dashboard: React.FC = () => {
       const now = new Date();
       const nextMidnight = new Date(now);
       nextMidnight.setDate(now.getDate() + 1);
-      nextMidnight.setHours(0, 0, 0, 0, 0);
+      nextMidnight.setHours(0, 0, 0, 0);
 
       const msUntilMidnight = nextMidnight.getTime() - now.getTime();
       timeoutId = window.setTimeout(() => {
@@ -482,7 +482,7 @@ export const Dashboard: React.FC = () => {
         {[
           ['Todos', ClipboardList, 'Total de Processos'], ['Atrasados', AlertTriangle, 'Atrasados'], ['Vence hoje', Clock3, 'Vence Hoje'],
           ['Próximos 5 dias', CalendarDays, 'Próximos 5 dias'], ['Aguardando retorno', RotateCcw, 'Aguardando retorno'], ['Para assinatura', PenLine, 'Para Assinatura'], ['Concluídos', CheckCircle2, 'Concluídos']
-        ].map(([label, Icon, filter]) => <button className={filtroAtivo === filter || (!filtroAtivo && filter === 'Total de Processos') ? 'is-active' : ''} key={label as string} onClick={() => setFiltroAtivo(filter as string === 'Total de Processos' ? null : filter as string)} type="button"><Icon size={16} />{label}</button>)}
+        ].map(([label, Icon, filter]) => <button className={filtroAtivo === filter || (!filtroAtivo && filter === 'Total de Processos') ? 'is-active' : ''} key={String(label)} onClick={() => setFiltroAtivo(String(filter) === 'Total de Processos' ? null : String(filter))} type="button">{typeof Icon === 'function' ? React.createElement(Icon, { size: 16 }) : null}{typeof label === 'string' ? label : ''}</button>)}
       </nav>
 
       <section className="management-table-card">

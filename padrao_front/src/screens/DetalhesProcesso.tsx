@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileText } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { FormCadastro } from '../types';
+import HistoricoProcesso from '../components/processos/HistoricoProcesso';
 import '../styles/DetalhesProcesso.css';
 
 type AbaAtiva = 'dados' | 'historico' | 'movimentacoes' | 'anexos' | 'observacoes';
@@ -220,7 +221,15 @@ const DetalhesProcesso: React.FC = () => {
         </aside>
       </div>
 
-      {abaAtiva !== 'dados' && (
+      {abaAtiva === 'historico' && processoSelecionado?.id && (
+        <HistoricoProcesso idProcesso={processoSelecionado.id} aba="historico" />
+      )}
+
+      {abaAtiva === 'movimentacoes' && processoSelecionado?.id && (
+        <HistoricoProcesso idProcesso={processoSelecionado.id} aba="movimentacoes" />
+      )}
+
+      {abaAtiva !== 'dados' && abaAtiva !== 'historico' && abaAtiva !== 'movimentacoes' && (
         <div className="detalhes-processo__placeholder">
           <strong>{tabs.find((tab) => tab.id === abaAtiva)?.label}</strong>
           <p>Conteúdo da aba ainda não implementado para esta visualização.</p>

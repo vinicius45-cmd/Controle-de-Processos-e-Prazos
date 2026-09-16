@@ -1,5 +1,5 @@
 import { api } from '../config/api';
-import { Processo } from '../types';
+import { FormCadastro, Processo } from '../types';
 
 const STORAGE_KEY = 'processos_cadastrados';
 
@@ -34,6 +34,7 @@ export const ProcessoService = {
       idUnidade: processo.idUnidade,
       idTipoAssunto: processo.idTipoAssunto,
       idTipoDocumento: processo.idTipoDocumento,
+      idTipoSituacaoProcesso: processo.idTipoSituacaoProcesso,
       dsAssunto: processo.assunto,
       dtEntrada: processo.dataEntrada,
       dtPrazoAreaTecnica: processo.prazoAreaTecnica || null,

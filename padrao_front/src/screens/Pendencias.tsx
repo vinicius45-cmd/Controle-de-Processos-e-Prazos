@@ -200,7 +200,7 @@ const Pendencias: React.FC = () => {
   const [colunaDestinoId, setColunaDestinoId] = useState<string | null>(null);
   const [hoje, setHoje] = useState<Date>(() => {
     const agora = new Date();
-    agora.setHours(0, 0, 0, 0, 0);
+    agora.setHours(0, 0, 0, 0);
     return agora;
   });
 
@@ -219,12 +219,12 @@ const Pendencias: React.FC = () => {
   useEffect(() => {
     const proximoDia = new Date(hoje);
     proximoDia.setDate(proximoDia.getDate() + 1);
-    proximoDia.setHours(0, 0, 0, 0, 0);
+    proximoDia.setHours(0, 0, 0, 0);
 
     const msAteMeiaNoite = proximoDia.getTime() - Date.now();
     const timer = window.setTimeout(() => {
       const novaData = new Date();
-      novaData.setHours(0, 0, 0, 0, 0);
+      novaData.setHours(0, 0, 0, 0);
       setHoje(novaData);
     }, msAteMeiaNoite);
 
@@ -260,20 +260,6 @@ const Pendencias: React.FC = () => {
     event.dataTransfer.setDragImage(img, 0, 0);
     event.dataTransfer.effectAllowed = 'move';
     setColunaArrastadaId(colunaId);
-  };
-
-  const moverColuna = (ids: string[], fromId: string, toId: string): string[] => {
-    const next = [...ids];
-    const fromIndex = next.indexOf(fromId);
-    const toIndex = next.indexOf(toId);
-
-    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
-      return ids;
-    }
-
-    const [moved] = next.splice(fromIndex, 1);
-    next.splice(toIndex, 0, moved);
-    return next;
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>): void => {
@@ -325,7 +311,7 @@ const Pendencias: React.FC = () => {
   };
 
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>, colunaId: string): void => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, _colunaId: string): void => {
     event.preventDefault();
     setColunaArrastadaId(null);
     setColunaDestinoId(null);

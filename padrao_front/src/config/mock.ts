@@ -1,4 +1,4 @@
-import { CdpUsuario, Ente, Operadora, TipoAssunto, TipoDocumento, Unidade } from '../types';
+import { CdpUsuario, DistribuicaoSituacao, Ente, Operadora, ProcessoDistribuicao, ProcessoSituacao, TipoAssunto, TipoDocumento, TipoSituacaoDistribuicao, TipoSituacaoProcesso, Unidade, UnidadeHierarquia } from '../types';
 
 export const MOCK_CDP_USERS: CdpUsuario[] = [
   {
@@ -159,6 +159,13 @@ export const localMockUnidades: Unidade[] = [
   { idUnidade: 5, nmUnidade: 'Coordenação de Processos da SUFISA', sgUnidade: 'CP-SUFISA', blAtivo: 'S', idUnidadeSuperior: 3 }
 ];
 
+export const localMockUnidadesHierarquia: UnidadeHierarquia[] = [
+  { idUnidadeHierarquia: 1, idUnidade: 1, idUnidadeSuperior: null, dtInicioVigencia: '2026-01-01', dtFimVigencia: null, blVigente: 'S' },
+  { idUnidadeHierarquia: 2, idUnidade: 2, idUnidadeSuperior: null, dtInicioVigencia: '2026-01-01', dtFimVigencia: null, blVigente: 'S' },
+  { idUnidadeHierarquia: 3, idUnidade: 4, idUnidadeSuperior: 1, dtInicioVigencia: '2026-01-01', dtFimVigencia: null, blVigente: 'S' },
+  { idUnidadeHierarquia: 4, idUnidade: 5, idUnidadeSuperior: 3, dtInicioVigencia: '2026-01-01', dtFimVigencia: null, blVigente: 'S' }
+];
+
 export const localMockTiposAssunto: TipoAssunto[] = [
   { idTipoAssunto: 1, idUnidade: 1, nmTipoAssunto: 'Ofício', blAtivo: 'S' },
   { idTipoAssunto: 2, idUnidade: 1, nmTipoAssunto: 'Requerimento', blAtivo: 'S' },
@@ -172,4 +179,32 @@ export const localMockTiposDocumento: TipoDocumento[] = [
   { idTipoDocumento: 2, nmTipoDocumento: 'Memorando', blAtivo: 'S' },
   { idTipoDocumento: 3, nmTipoDocumento: 'Despacho', blAtivo: 'S' },
   { idTipoDocumento: 4, nmTipoDocumento: 'Resposta SEI', blAtivo: 'S' }
+];
+
+export const localMockTiposSituacaoDistribuicao: TipoSituacaoDistribuicao[] = [
+  { idTipoSituacaoDistribuicao: 1, nmTipoSituacaoDistribuicao: 'Aguardando', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoDistribuicao: 2, nmTipoSituacaoDistribuicao: 'Respondido', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoDistribuicao: 3, nmTipoSituacaoDistribuicao: 'Concluído', blSituacaoFinal: 'S', blAtivo: 'S' },
+  { idTipoSituacaoDistribuicao: 4, nmTipoSituacaoDistribuicao: 'Cancelado', blSituacaoFinal: 'S', blAtivo: 'S' }
+];
+
+export const localMockTiposSituacaoProcesso: TipoSituacaoProcesso[] = [
+  { idTipoSituacaoProcesso: 1, nmTipoSituacaoProcesso: 'Aberto', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoProcesso: 2, nmTipoSituacaoProcesso: 'Em análise', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoProcesso: 3, nmTipoSituacaoProcesso: 'Aguardando retorno', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoProcesso: 4, nmTipoSituacaoProcesso: 'Para assinatura', blSituacaoFinal: 'N', blAtivo: 'S' },
+  { idTipoSituacaoProcesso: 5, nmTipoSituacaoProcesso: 'Concluído', blSituacaoFinal: 'S', blAtivo: 'S' },
+  { idTipoSituacaoProcesso: 6, nmTipoSituacaoProcesso: 'Cancelado', blSituacaoFinal: 'S', blAtivo: 'S' }
+];
+
+export const localMockProcessosSituacoes: ProcessoSituacao[] = [
+  { idProcessoSituacao: 1, idProcesso: '1', idTipoSituacaoProcesso: 3, dtInicio: '2026-06-04', dtFim: null, dsObservacao: 'Aguardando retorno da unidade.' }
+];
+
+export const localMockProcessosDistribuicoes: ProcessoDistribuicao[] = [
+  { idDistribuicao: 1, idProcesso: '1', idUnidade: 1, dtDistribuicao: '2026-06-05', dtRecebimento: '2026-06-06', dtConclusao: null, dsObservacao: 'Distribuição inicial.' }
+];
+
+export const localMockDistribuicoesSituacoes: DistribuicaoSituacao[] = [
+  { idDistribuicaoSituacao: 1, idDistribuicao: 1, idTipoSituacaoDistribuicao: 1, dtInicio: '2026-06-05', dtFim: null }
 ];

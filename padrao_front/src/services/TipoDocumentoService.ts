@@ -20,8 +20,8 @@ export const TipoDocumentoService = {
       const index = localMockTiposDocumento.findIndex((item) => item.idTipoDocumento === id); if (index < 0) throw new Error('Tipo de documento não encontrado'); localMockTiposDocumento[index] = { ...localMockTiposDocumento[index], ...dados }; return localMockTiposDocumento[index];
     }
   },
-  async alterarStatus(id: number, blAtivo: 'S' | 'N'): Promise<void> {
-    try { await api.patch(`/tipos-documento/${id}/status`, { blAtivo }); } catch { const item = localMockTiposDocumento.find((x) => x.idTipoDocumento === id); if (item) item.blAtivo = blAtivo; }
+  async desativar(id: number): Promise<void> {
+    try { await api.patch(`/tipos-documento/${id}/desativar`); } catch { const item = localMockTiposDocumento.find((x) => x.idTipoDocumento === id); if (item) item.blAtivo = 'N'; }
   }
 };
 

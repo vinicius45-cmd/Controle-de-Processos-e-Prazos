@@ -47,12 +47,12 @@ export const UnidadeService = {
     }
   },
 
-  async alterarStatus(idUnidade: number, blAtivo: 'S' | 'N'): Promise<void> {
+  async desativar(idUnidade: number): Promise<void> {
     try {
-      await api.patch(`/unidades/${idUnidade}/status`, { blAtivo });
+      await api.patch(`/unidades/${idUnidade}/desativar`);
     } catch {
       const unidade = localMockUnidades.find((item) => item.idUnidade === idUnidade);
-      if (unidade) unidade.blAtivo = blAtivo;
+      if (unidade) unidade.blAtivo = 'N';
     }
   }
 };

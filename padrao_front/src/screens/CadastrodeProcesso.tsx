@@ -4,6 +4,7 @@ import { useApp } from '../app/AppProvider';
 import { useEntes } from '../hooks/useEntes';
 import { useUnidades } from '../hooks/useUnidades';
 import { useTiposProcesso } from '../hooks/useTiposProcesso';
+import { useTiposSituacaoProcesso } from '../hooks/useTiposSituacaoProcesso';
 import ProcessoService from '../services/ProcessoService';
 import { FormCadastro, ResumoProcesso } from '../types';
 import '../styles/CadastrodeProcesso.css';
@@ -30,6 +31,7 @@ const CadastrodeProcesso: React.FC = () => {
     prazoAreaTecnica: '',
     prazoFinal: '',
     situacaoProcesso: '',
+    idTipoSituacaoProcesso: null,
     responsavel: '',
     documentoSEI: '',
     idTipoDocumento: null,
@@ -38,6 +40,7 @@ const CadastrodeProcesso: React.FC = () => {
     observacao: '',
   });
   const { tiposAssunto, tiposDocumento } = useTiposProcesso(form.idUnidade);
+  const { tiposSituacaoProcesso } = useTiposSituacaoProcesso();
 
   const [resumo, setResumo] = useState<ResumoProcesso>({
     status: 'OK',
@@ -219,10 +222,11 @@ const CadastrodeProcesso: React.FC = () => {
         ...prev,
         [name]: target.checked,
       }));
-    } else if (name === 'idEnte' || name === 'idUnidade') {
+    } else if (name === 'idEnte' || name === 'idUnidade' || name === 'idTipoSituacaoProcesso') {
       setForm((prev) => ({
         ...prev,
         [name]: value ? Number(value) : null,
+        ...(name === 'idTipoSituacaoProcesso' ? { situacaoProcesso: tiposSituacaoProcesso.find((item) => String(item.idTipoSituacaoProcesso) === value)?.nmTipoSituacaoProcesso ?? '' } : {})
       }));
     } else {
       setForm((prev) => ({
@@ -266,6 +270,7 @@ const CadastrodeProcesso: React.FC = () => {
       !form.destinatario ||
       !form.dataEntrada ||
       !form.prazoFinal
+      || !form.idTipoSituacaoProcesso
     ) {
       alert('Por favor, preencha todos os campos obrigatórios!');
       return;
@@ -299,6 +304,7 @@ const CadastrodeProcesso: React.FC = () => {
       prazoAreaTecnica: '',
       prazoFinal: '',
       situacaoProcesso: '',
+      idTipoSituacaoProcesso: null,
       responsavel: '',
       documentoSEI: '',
       idTipoDocumento: null,
@@ -769,15 +775,17 @@ const CadastrodeProcesso: React.FC = () => {
                   </label>
                   <select
                     id="situacaoProcesso"
-                    name="situacaoProcesso"
-                    value={form.situacaoProcesso}
+                    name="idTipoSituacaoProcesso"
+                    value={form.idTipoSituacaoProcesso ?? ''}
                     onChange={handleInputChange}
                     required
                   >
                     <option value="">Selecione uma situação</option>
-                    <option value="em-andamento">Em andamento</option>
-                    <option value="concluido">Concluído</option>
-                    <option value="parado">Parado</option>
+                    {tiposSituacaoProcesso.map((tipo) => (
+                      <option key={tipo.idTipoSituacaoProcesso} value={tipo.idTipoSituacaoProcesso}>
+                        {tipo.nmTipoSituacaoProcesso}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

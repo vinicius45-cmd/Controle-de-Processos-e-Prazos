@@ -3,8 +3,8 @@ import { useValidadores } from '../hooks/useValidadores';
 
 // ATENÇÃO: Verifique no projeto como as permissões são importadas (pode ser um hook como useAuth)
 // Abaixo criamos funções fictícias para simular o comportamento exigido pelo desafio
-const temLeitura = (recurso: string) => true; // Simula permissão de ver a tela
-const temEscrita = (recurso: string) => true; // Simula permissão de clicar no botão
+const temLeitura = (_recurso: string) => true; // Simula permissão de ver a tela
+const temEscrita = (_recurso: string) => true; // Simula permissão de clicar no botão
 
 export const ValidadorList: React.FC = () => {
   const { validadores, setValidadores, loading } = useValidadores();

@@ -33,6 +33,19 @@ export interface Unidade {
   dtFimVigencia?: string | null;
 }
 
+export interface UnidadeHierarquia {
+  idUnidadeHierarquia: number;
+  idUnidade: number;
+  idUnidadeSuperior?: number | null;
+  dtInicioVigencia: string;
+  dtFimVigencia?: string | null;
+  blVigente: 'S' | 'N';
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
+  dtAtualizacao?: string;
+  idUsuarioAtualizacao?: number;
+}
+
 export interface TipoAssunto {
   idTipoAssunto: number;
   idUnidade: number;
@@ -44,6 +57,54 @@ export interface TipoDocumento {
   idTipoDocumento: number;
   nmTipoDocumento: string;
   blAtivo: 'S' | 'N';
+}
+
+export interface TipoSituacaoProcesso {
+  idTipoSituacaoProcesso: number;
+  nmTipoSituacaoProcesso: string;
+  blSituacaoFinal: 'S' | 'N';
+  blAtivo: 'S' | 'N';
+}
+
+export interface TipoSituacaoDistribuicao {
+  idTipoSituacaoDistribuicao: number;
+  nmTipoSituacaoDistribuicao: string;
+  blSituacaoFinal: 'S' | 'N';
+  blAtivo: 'S' | 'N';
+}
+
+export interface ProcessoSituacao {
+  idProcessoSituacao: number;
+  idProcesso: number | string;
+  idTipoSituacaoProcesso: number;
+  dtInicio: string;
+  dtFim?: string | null;
+  dsObservacao?: string;
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
+}
+
+export interface ProcessoDistribuicao {
+  idDistribuicao: number;
+  idProcesso: number | string;
+  idUnidade: number;
+  dtDistribuicao: string;
+  dtRecebimento?: string | null;
+  dtConclusao?: string | null;
+  dsObservacao?: string;
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
+}
+
+export interface DistribuicaoSituacao {
+  idDistribuicaoSituacao: number;
+  idDistribuicao: number;
+  idTipoSituacaoDistribuicao: number;
+  dtInicio: string;
+  dtFim?: string | null;
+  dsObservacao?: string;
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
 }
 
 export interface Usuario {
@@ -75,6 +136,7 @@ export interface FormCadastro {
   prazoAreaTecnica: string;
   prazoFinal: string;
   situacaoProcesso: string;
+  idTipoSituacaoProcesso?: number | null;
   responsavel: string;
   documentoSEI: string;
   idTipoDocumento?: number | null;
@@ -107,7 +169,7 @@ export interface CardPendencia {
   titulo: string;
   setor: string;
   diasRestantes: number;
-  status: 'atrasado' | 'vence_hoje' | 'proximos_5_dias' | 'para_assinatura' | 'especiais';
+  status: 'atrasado' | 'vence_hoje' | 'proximos_5_dias' | 'para_assinatura' | 'especiais' | 'orgaos_controle';
 }
 
 export type PendenciasKanban = Record<string, CardPendencia[]>;

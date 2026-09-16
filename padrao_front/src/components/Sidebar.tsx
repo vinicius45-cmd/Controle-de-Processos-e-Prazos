@@ -49,7 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   isMobileOpen = false,
   onCloseMobile,
-  title = 'CONTROLE DE PROCESSOS E PRAZOS'
 }) => {
   const { fazerLogout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);

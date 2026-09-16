@@ -5,7 +5,6 @@ import Administracao from '../screens/Administracao';
 import DetalhesProcesso from '../screens/DetalhesProcesso';
 import ParaAssinatura from '../screens/ParaAssinatura';
 import Relatorios from '../screens/Relatorios';
-import { withProps } from '../screens/PlaceholderView';
 
 // Lazy load modules/screens to support code splitting
 const Dashboard = lazy(() => import('../screens/Dashboard'));

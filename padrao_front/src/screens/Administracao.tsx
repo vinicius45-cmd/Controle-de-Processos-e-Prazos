@@ -8,9 +8,11 @@ import { Unidade } from '../types';
 import { TipoAssunto, TipoDocumento } from '../types';
 import TipoAssuntoService from '../services/TipoAssuntoService';
 import TipoDocumentoService from '../services/TipoDocumentoService';
+import SituacaoCatalogo from '../components/admin/SituacaoCatalogo';
+import HierarquiaCatalogo from '../components/admin/HierarquiaCatalogo';
 import '../styles/Administracao.css';
 
-type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'tipos-assunto' | 'tipos-documento' | 'configuracoes' | 'permissoes';
+type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'hierarquia' | 'tipos-assunto' | 'tipos-documento' | 'situacoes-processo' | 'situacoes-distribuicao' | 'configuracoes' | 'permissoes';
 
 type PerfilAcesso = 'admin' | 'analista' | 'visualizador';
 
@@ -31,6 +33,15 @@ interface ConfiguracaoSistema {
   habilitarEmail: boolean;
   modoUrgenciaAutomatico: boolean;
   permitirAcessoExterno: boolean;
+}
+
+type NivelPermissao = 'NENHUM' | 'LEITURA' | 'ESCRITA';
+
+interface PermissaoAdmin {
+  id: string;
+  nome: string;
+  descricao: string;
+  nivel: NivelPermissao;
 }
 
 const usuariosMock: UsuarioAdmin[] = [
@@ -104,7 +115,7 @@ const Administracao: React.FC = () => {
   const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<UsuarioAdmin | null>(null);
   const [isConfirmacaoExcluirAberto, setIsConfirmacaoExcluirAberto] = useState(false);
   const [configuracoesSalvas, setConfiguracoesSalvas] = useState(false);
-  const [permissoes, setPermissoes] = useState([
+  const [permissoes, setPermissoes] = useState<PermissaoAdmin[]>([
     { id: 'cdp-usuarios', nome: 'Gerenciar usuários', descricao: 'Permite visualizar e editar usuários do sistema.', nivel: 'ESCRITA' as const },
     { id: 'cdp-grupos', nome: 'Gerenciar perfis', descricao: 'Permite alterar perfis e grupos de acesso.', nivel: 'ESCRITA' as const },
     { id: 'cdp-sistemas', nome: 'Acessar controle de sistemas', descricao: 'Permite acesso ao painel de sistemas no CDP.', nivel: 'LEITURA' as const },
@@ -177,7 +188,7 @@ const Administracao: React.FC = () => {
     window.setTimeout(() => setConfiguracoesSalvas(false), 3000);
   };
 
-  const handlePermissaoChange = (id: string, nivel: 'NENHUM' | 'LEITURA' | 'ESCRITA'): void => {
+  const handlePermissaoChange = (id: string, nivel: NivelPermissao): void => {
     setPermissoes((current) => current.map((item) => (
       item.id === id ? { ...item, nivel } : item
     )));
@@ -236,7 +247,8 @@ const Administracao: React.FC = () => {
   };
 
   const alternarStatusEnte = async (ente: Ente): Promise<void> => {
-    await EnteService.alterarStatus(ente.idEnte, ente.blAtivo === 'S' ? 'N' : 'S');
+    if (ente.blAtivo !== 'S') return;
+    await EnteService.desativar(ente.idEnte);
     await carregarEntes();
   };
 
@@ -266,7 +278,8 @@ const Administracao: React.FC = () => {
   };
 
   const alternarStatusUnidade = async (unidade: Unidade): Promise<void> => {
-    await UnidadeService.alterarStatus(unidade.idUnidade, unidade.blAtivo === 'S' ? 'N' : 'S');
+    if (unidade.blAtivo !== 'S') return;
+    await UnidadeService.desativar(unidade.idUnidade);
     await carregarUnidades();
   };
 
@@ -305,8 +318,11 @@ const Administracao: React.FC = () => {
   };
 
   const alternarStatusTipo = async (tipo: TipoAssunto | TipoDocumento): Promise<void> => {
-    if ('idTipoAssunto' in tipo) await TipoAssuntoService.alterarStatus(tipo.idTipoAssunto, tipo.blAtivo === 'S' ? 'N' : 'S');
-    else await TipoDocumentoService.alterarStatus(tipo.idTipoDocumento, tipo.blAtivo === 'S' ? 'N' : 'S');
+    if ('idTipoAssunto' in tipo) {
+      await TipoAssuntoService.alterarStatus(tipo.idTipoAssunto, tipo.blAtivo === 'S' ? 'N' : 'S');
+    } else if (tipo.blAtivo === 'S') {
+      await TipoDocumentoService.desativar(tipo.idTipoDocumento);
+    }
     await carregarTipos();
   };
 
@@ -441,11 +457,20 @@ const Administracao: React.FC = () => {
         <button type="button" className={`administracao-tab ${abaAtiva === 'unidades' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('unidades')} aria-selected={abaAtiva === 'unidades'}>
           Unidades
         </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'hierarquia' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('hierarquia')} aria-selected={abaAtiva === 'hierarquia'}>
+          Hierarquia
+        </button>
         <button type="button" className={`administracao-tab ${abaAtiva === 'tipos-assunto' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('tipos-assunto')} aria-selected={abaAtiva === 'tipos-assunto'}>
           Tipos de assunto
         </button>
         <button type="button" className={`administracao-tab ${abaAtiva === 'tipos-documento' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('tipos-documento')} aria-selected={abaAtiva === 'tipos-documento'}>
           Tipos de documento
+        </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'situacoes-processo' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('situacoes-processo')} aria-selected={abaAtiva === 'situacoes-processo'}>
+          Situações de processo
+        </button>
+        <button type="button" className={`administracao-tab ${abaAtiva === 'situacoes-distribuicao' ? 'administracao-tab--active' : ''}`} onClick={() => handleSelectAba('situacoes-distribuicao')} aria-selected={abaAtiva === 'situacoes-distribuicao'}>
+          Situações de distribuição
         </button>
         <button
           type="button"
@@ -708,9 +733,10 @@ const Administracao: React.FC = () => {
                     <button
                       type="button"
                       className={`administracao-icon-button ${ente.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`}
+                      disabled={ente.blAtivo !== 'S'}
                       onClick={() => void alternarStatusEnte(ente)}
                     >
-                      {ente.blAtivo === 'S' ? 'Inativar' : 'Ativar'}
+                      {ente.blAtivo === 'S' ? 'Inativar' : 'Inativo'}
                     </button>
                   </td>
                 </tr>
@@ -735,13 +761,13 @@ const Administracao: React.FC = () => {
               <div className="administracao-form-grid">
                 <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="nmUnidade">Nome da unidade</label><input id="nmUnidade" className="administracao-form-input" value={unidadeForm.nmUnidade} onChange={(event) => setUnidadeForm((current) => ({ ...current, nmUnidade: event.target.value }))} /></div>
                 <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="sgUnidade">Sigla</label><input id="sgUnidade" className="administracao-form-input" maxLength={30} value={unidadeForm.sgUnidade} onChange={(event) => setUnidadeForm((current) => ({ ...current, sgUnidade: event.target.value }))} /></div>
-                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="idUnidadeSuperior">Unidade superior</label><select id="idUnidadeSuperior" className="administracao-form-select" value={unidadeForm.idUnidadeSuperior ?? ''} onChange={(event) => setUnidadeForm((current) => ({ ...current, idUnidadeSuperior: event.target.value ? Number(event.target.value) : null }))}><option value="">Raiz da estrutura</option>{unidades.filter((item) => item.idUnidade !== unidadeEditando?.idUnidade).map((item) => <option key={item.idUnidade} value={item.idUnidade}>{item.sgUnidade} - {item.nmUnidade}</option>)}</select></div>
+                <div className="administracao-form-row"><label className="administracao-form-label" htmlFor="idUnidadeSuperior">Unidade superior</label><select id="idUnidadeSuperior" className="administracao-form-select" value={unidadeForm.idUnidadeSuperior ?? ''} onChange={(event) => setUnidadeForm((current) => ({ ...current, idUnidadeSuperior: event.target.value ? Number(event.target.value) : null }))}><option value="">Raiz da estrutura</option>{unidades.filter((item) => item.blAtivo === 'S' && item.idUnidade !== unidadeEditando?.idUnidade).map((item) => <option key={item.idUnidade} value={item.idUnidade}>{item.sgUnidade} - {item.nmUnidade}</option>)}</select></div>
               </div>
               <div className="administracao-form-actions"><button type="button" className="administracao-button administracao-button--secondary" onClick={() => setUnidadeFormAberto(false)}>Cancelar</button><button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvarUnidade()}>Salvar unidade</button></div>
             </div>
           )}
           <table className="administracao-table"><thead><tr><th>Nome</th><th>Sigla</th><th>Unidade superior</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-            {unidadesLoading ? <tr><td colSpan={5}>Carregando unidades...</td></tr> : unidades.length === 0 ? <tr><td colSpan={5}>Nenhuma unidade encontrada.</td></tr> : unidades.map((unidade) => <tr key={unidade.idUnidade}><td><strong>{unidade.nmUnidade}</strong></td><td>{unidade.sgUnidade}</td><td>{unidades.find((item) => item.idUnidade === unidade.idUnidadeSuperior)?.sgUnidade ?? 'Raiz'}</td><td><span className={`administracao-status administracao-status--${unidade.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{unidade.blAtivo === 'S' ? 'Ativa' : 'Inativa'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoUnidade(unidade)}>Editar</button><button type="button" className={`administracao-icon-button ${unidade.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`} onClick={() => void alternarStatusUnidade(unidade)}>{unidade.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}
+            {unidadesLoading ? <tr><td colSpan={5}>Carregando unidades...</td></tr> : unidades.length === 0 ? <tr><td colSpan={5}>Nenhuma unidade encontrada.</td></tr> : unidades.map((unidade) => <tr key={unidade.idUnidade}><td><strong>{unidade.nmUnidade}</strong></td><td>{unidade.sgUnidade}</td><td>{unidades.find((item) => item.idUnidade === unidade.idUnidadeSuperior)?.sgUnidade ?? 'Raiz'}</td><td><span className={`administracao-status administracao-status--${unidade.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{unidade.blAtivo === 'S' ? 'Ativa' : 'Inativa'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoUnidade(unidade)}>Editar</button><button type="button" className={`administracao-icon-button ${unidade.blAtivo === 'S' ? 'administracao-icon-button--danger' : ''}`} disabled={unidade.blAtivo !== 'S'} onClick={() => void alternarStatusUnidade(unidade)}>{unidade.blAtivo === 'S' ? 'Inativar' : 'Inativo'}</button></td></tr>)}
           </tbody></table>
         </div>
       )}
@@ -762,9 +788,13 @@ const Administracao: React.FC = () => {
               <div className="administracao-form-actions"><button type="button" className="administracao-button administracao-button--secondary" onClick={() => setTipoFormAberto(false)}>Cancelar</button><button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvarTipo()}>Salvar</button></div>
             </div>
           )}
-          {abaAtiva === 'tipos-assunto' ? <table className="administracao-table"><thead><tr><th>Tipo de assunto</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposAssunto.map((tipo) => <tr key={tipo.idTipoAssunto}><td><strong>{tipo.nmTipoAssunto}</strong></td><td>{unidades.find((item) => item.idUnidade === tipo.idUnidade)?.sgUnidade ?? tipo.idUnidade}</td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}</tbody></table> : <table className="administracao-table"><thead><tr><th>Tipo de documento</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposDocumento.map((tipo) => <tr key={tipo.idTipoDocumento}><td><strong>{tipo.nmTipoDocumento}</strong></td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}</tbody></table>}
+          {abaAtiva === 'tipos-assunto' ? <table className="administracao-table"><thead><tr><th>Tipo de assunto</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposAssunto.map((tipo) => <tr key={tipo.idTipoAssunto}><td><strong>{tipo.nmTipoAssunto}</strong></td><td>{unidades.find((item) => item.idUnidade === tipo.idUnidade)?.sgUnidade ?? tipo.idUnidade}</td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Ativar'}</button></td></tr>)}</tbody></table> : <table className="administracao-table"><thead><tr><th>Tipo de documento</th><th>Status</th><th>Ações</th></tr></thead><tbody>{tiposDocumento.map((tipo) => <tr key={tipo.idTipoDocumento}><td><strong>{tipo.nmTipoDocumento}</strong></td><td><span className={`administracao-status administracao-status--${tipo.blAtivo === 'S' ? 'ativo' : 'inativo'}`}>{tipo.blAtivo === 'S' ? 'Ativo' : 'Inativo'}</span></td><td className="administracao-actions-cell"><button type="button" className="administracao-icon-button" onClick={() => abrirEdicaoTipo(tipo)}>Editar</button><button type="button" className="administracao-icon-button administracao-icon-button--danger" disabled={tipo.blAtivo !== 'S'} onClick={() => void alternarStatusTipo(tipo)}>{tipo.blAtivo === 'S' ? 'Inativar' : 'Inativo'}</button></td></tr>)}</tbody></table>}
         </div>
       )}
+
+      {abaAtiva === 'situacoes-processo' && <SituacaoCatalogo tipo="processo" />}
+      {abaAtiva === 'situacoes-distribuicao' && <SituacaoCatalogo tipo="distribuicao" />}
+      {abaAtiva === 'hierarquia' && <HierarquiaCatalogo />}
 
       {abaAtiva === 'configuracoes' && (
         <div className="administracao-config-card">

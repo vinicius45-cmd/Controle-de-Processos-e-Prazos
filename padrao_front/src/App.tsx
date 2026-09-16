@@ -13,9 +13,7 @@ import {
   Bus,
   CreditCard,
   FileText,
-  FilePenLine,
   Key,
-  LayoutDashboard,
   Lock,
   LucideIcon,
   Route,
@@ -145,7 +143,7 @@ const MainLayoutShell: React.FC = () => {
 
       <div className="app-shell__workspace">
         <Headerbar />
-        <ContentArea fallback={<LoadingSpinner />} viewComponent={ViewComponent} />
+        <ContentArea fallback={<LoadingSpinner />} viewComponent={ViewComponent ?? null} />
         <footer className="app-footer">
           Secretaria de Estado de Mobilidade do Distrito Federal • SEMOB-DF • 2026
         </footer>

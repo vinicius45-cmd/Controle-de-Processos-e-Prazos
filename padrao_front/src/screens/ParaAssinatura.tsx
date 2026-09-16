@@ -17,6 +17,7 @@ interface DocumentoAssinatura {
   origemSetor: string;
   dataEntrada: string;
   prazoFinal: string;
+  dataEnvio?: string;
 }
 
 const documentosMock: DocumentoAssinatura[] = [
@@ -84,11 +85,11 @@ const formatDatePtBR = (value: Date): string => {
 
 const criarHoje = (): Date => {
   const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0, 0);
+  hoje.setHours(0, 0, 0, 0);
   return hoje;
 };
 
-const calcularDataEntrada = (hoje: Date, criticidade: CriticidadeDocumento): Date => {
+const calcularDataEntrada = (hoje: Date, _criticidade: CriticidadeDocumento): Date => {
   const dataEntrada = new Date(hoje);
   dataEntrada.setDate(hoje.getDate() - 3);
   return dataEntrada;
@@ -188,7 +189,7 @@ const ParaAssinatura: React.FC = () => {
   useEffect(() => {
     const proximoDia = new Date(hoje);
     proximoDia.setDate(proximoDia.getDate() + 1);
-    proximoDia.setHours(0, 0, 0, 0, 0);
+    proximoDia.setHours(0, 0, 0, 0);
 
     const msAteMeiaNoite = proximoDia.getTime() - Date.now();
     const timer = window.setTimeout(() => {

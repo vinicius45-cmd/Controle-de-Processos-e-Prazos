@@ -5,6 +5,15 @@ export const api = axios.create({
   timeout: 10000,
 });
 
+const useMockApi = import.meta.env.VITE_USE_MOCK_API === 'true';
+
+api.interceptors.request.use((config) => {
+  if (useMockApi) {
+    throw new Error('API mock habilitada');
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
