@@ -517,8 +517,8 @@ export const Dashboard: React.FC = () => {
       <div className="management-note"><Info size={15} /> O cálculo de dias considera o prazo final do processo. Clique em um processo para ver detalhes e pendências das unidades.</div>
 
       <div className="management-legacy" aria-hidden="true">
-      <div className="process-form__back">← <span>Voltar para Processos</span></div>
-      <div className="process-form__back">← <span>Voltar para Processos</span></div>
+      <div className="process-form__back"><span>Processos</span></div>
+      <div className="process-form__back"><span>Processos</span></div>
       <header className="process-form__heading">
         <div>
           <h1>Novo processo</h1>

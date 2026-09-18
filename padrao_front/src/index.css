@@ -558,16 +558,19 @@ body {
   grid-template-columns: minmax(220px, 1fr) auto;
   gap: 18px;
   margin: 0;
-  min-height: 64px;
+  min-height: 69px;
   padding: 0 24px;
   position: relative;
   z-index: 40;
 }
 
 .app-header--compact .app-header__title {
-  color: #122442;
-  font-size: 1.35rem;
-  font-weight: 900;
+  color: #000000;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .app-header__title-group,
@@ -586,12 +589,12 @@ body {
   align-items: center;
   background: transparent;
   border: 0;
-  color: #0759d7;
+  color: #000000;
   cursor: pointer;
-  display: flex;
-  font-size: 0.76rem;
+  display: inline-flex;
+  font-size: 30px;
   font-weight: 700;
-  gap: 7px;
+  gap: 8px;
   padding: 0;
 }
 
@@ -610,10 +613,11 @@ body {
 }
 
 .app-header__title {
-  color: var(--semob-text);
-  font-size: 1.16rem;
-  font-weight: 800;
-  line-height: 1.22;
+  color: #000000;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1215,7 +1219,7 @@ body {
 
 .management-priority--vence-hoje { background: #f37c15; }
 .management-priority--proximo { background: #f4b915; }
-.management-priority--assinatura { background: #165dad; }
+.management-priority--assinatura { background: #111111; }
 .management-priority--ok { background: #9ba1a7; }
 
 .management-status {
@@ -1229,7 +1233,7 @@ body {
 .management-status--atrasado { background: #ffe0e0; color: #d64040; }
 .management-status--vence-hoje { background: #fff0d3; color: #e88100; }
 .management-status--proximo { background: #fff0cd; color: #ce8a05; }
-.management-status--assinatura { background: #dcedfb; color: #2465a8; }
+.management-status--assinatura { background: #f3f4f6; color: #111111; }
 .management-status--ok { background: #e0f2e5; color: #348052; }
 
 .management-table td.dashboard-table__days--late { color: #e53b3b; font-weight: 800; }
@@ -1351,6 +1355,7 @@ body {
   display: grid;
   gap: 10px;
   grid-template-columns: minmax(0, 1fr) 300px;
+  margin-top: 10px;
 }
 
 .process-form__sections {
@@ -1371,7 +1376,7 @@ body {
 .process-form__section h2,
 .process-form__summary h2 {
   color: #172641;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 800;
   margin: 0 0 13px;
 }
@@ -1470,6 +1475,24 @@ body {
   min-height: 70px;
   padding: 10px;
   resize: vertical;
+}
+
+.process-form__textarea-wrap {
+  min-width: 0;
+}
+
+.process-form__textarea-wrap textarea {
+  display: block;
+}
+
+.process-form__textarea-wrap small {
+  color: #687895;
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  line-height: 1;
+  margin-top: 5px;
+  text-align: right;
 }
 
 .process-form__input-icon {
@@ -1724,12 +1747,12 @@ body {
 .dashboard-badge--atrasado { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
 .dashboard-badge--vence-hoje { background: #ffedd5; border: 1px solid #fdba74; color: #f97316; }
 .dashboard-badge--proximo { background: #fef3c7; border: 1px solid #fcd34d; color: #b45309; }
-.dashboard-badge--assinatura { background: #dbeafe; border: 1px solid #93c5fd; color: #2563eb; }
+.dashboard-badge--assinatura { background: #f3f4f6; border: 1px solid #d1d5db; color: #111111; }
 .dashboard-badge--especial { background: #ede9fe; border: 1px solid #c4b5fd; color: #6d28d9; }
 .dashboard-badge--ok { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
 
 .dashboard-status--andamento { background: #e0f2fe; color: #0369a1; }
-.dashboard-status--assinatura { background: #dbeafe; color: #1d4ed8; }
+.dashboard-status--assinatura { background: #f3f4f6; color: #111111; }
 
 .dashboard-table__days {
   font-weight: 900;

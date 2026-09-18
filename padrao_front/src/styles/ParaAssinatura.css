@@ -274,7 +274,7 @@
 
 .para-assinatura__primary-action {
   align-items: center;
-  background: #1e56a0;
+  background: #111111;
   border: none;
   border-radius: 14px;
   color: #ffffff;
@@ -289,9 +289,9 @@
 }
 
 .para-assinatura__primary-action:hover {
-  background: #163f75;
+  background: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(30, 86, 160, 0.18);
+  box-shadow: 0 10px 24px rgba(17, 17, 17, 0.18);
 }
 
 .para-assinatura__primary-action--signed {

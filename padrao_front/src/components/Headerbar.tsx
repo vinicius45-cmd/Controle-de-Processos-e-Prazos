@@ -3,7 +3,6 @@ import {
   Bell,
   ChevronDown,
   HelpCircle,
-  Menu,
 } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { useAuth } from '../hooks/useAuth';
@@ -11,36 +10,35 @@ import { useModules } from '../hooks/useModules';
 
 export const Headerbar: React.FC = () => {
   const { fazerLogout, usuario } = useAuth();
-  const { activeModuleId, activeSubMenuId, toggleSidebar, navegarPara } = useApp();
+  const { activeModuleId, activeSubMenuId, navegarPara } = useApp();
   const { modulos } = useModules();
   const activeModule = modulos.find((module) => module.id === activeModuleId);
   const activeSubmenu = activeModule?.subMenus?.find((submenu) => submenu.id === activeSubMenuId);
-  const titleDisplay = activeSubmenu
-    ? `${activeModule?.nome ?? 'Sistema'} / ${activeSubmenu.titulo}`
-    : activeModule?.nome === 'Dashboard' ? 'Processos' : activeModule?.nome ?? 'Processos';
-  const mostrarTitulo = activeModuleId !== 'cadastro-processo';
   const telaCadastro = activeModuleId === 'cadastro-processo';
+  const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'pendencias', 'para-assinatura', 'relatorios', 'alertas', 'administracao'].includes(activeModuleId ?? '');
+  const mostrarBotaoRetorno = telaCadastro;
 
   return (
     <header className="app-header app-header--compact">
       <div className="app-header__title-group">
-        <button
-          aria-label="Abrir menu"
-          className="app-header__menu-button show-mobile-flex"
-          onClick={toggleSidebar}
-          type="button"
-        >
-          <Menu size={21} />
-        </button>
-        {telaCadastro ? (
+        {mostrarBotaoRetorno ? (
           <button
             className="process-header__back"
             type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('processo:voltar-lista'))}
+            onClick={() => {
+              if (telaCadastro) {
+                window.dispatchEvent(new CustomEvent('processo:voltar-lista'));
+                return;
+              }
+
+              navegarPara('dashboard');
+            }}
           >
-            <span aria-hidden="true">←</span> Voltar para Processos
+            <span aria-hidden="true"></span> Processos
           </button>
-        ) : mostrarTitulo ? <div><h1 className="app-header__title">{titleDisplay}</h1></div> : null}
+        ) : mostrarTituloProcessos ? (
+          <h1 className="app-header__title">Processos</h1>
+        ) : null}
       </div>
 
       <div className="app-header__actions">
