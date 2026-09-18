@@ -91,29 +91,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside aria-label="Menu principal" className={sidebarClasses}>
-        <header className="app-sidebar__brand">
-          <div className="app-sidebar__brand-mark" aria-hidden="true">
-            <span className="app-sidebar__brand-mark-inner">DF</span>
-          </div>
+        {isMobile && (
+          <button
+            aria-label="Fechar menu"
+            className="app-sidebar__icon-button app-sidebar__icon-button--close"
+            onClick={onCloseMobile}
+            type="button"
+          >
+            <X size={20} />
+          </button>
+        )}
 
-          {(!collapsed || isMobile) && (
-            <div className="app-sidebar__brand-copy">
-              <strong>{brandTitle}</strong>
-              <span>{brandSubtitle}</span>
-            </div>
-          )}
-
-          {isMobile && (
-            <button
-              aria-label="Fechar menu"
-              className="app-sidebar__icon-button"
-              onClick={onCloseMobile}
-              type="button"
-            >
-              <X size={20} />
-            </button>
-          )}
-        </header>
+        {(!collapsed || isMobile) && (
+          <header className="app-sidebar__brand-text">
+            <strong>{brandTitle}</strong>
+            <span>{brandSubtitle}</span>
+          </header>
+        )}
 
         <nav className="app-sidebar__nav">
           {items.map((item) => {

@@ -96,7 +96,6 @@ const SituacaoCatalogo: React.FC<SituacaoCatalogoProps> = ({ tipo }) => {
           </div>
           <div className="administracao-form-grid">
             <div className="administracao-form-row"><label className="administracao-form-label" htmlFor={`nome-situacao-${tipo}`}>Nome</label><input id={`nome-situacao-${tipo}`} className="administracao-form-input" maxLength={150} value={nome} onChange={(event) => setNome(event.target.value)} /></div>
-            <label className="administracao-form-row"><span className="administracao-form-label">Esta situação encerra o {tipo === 'processo' ? 'processo' : 'distribuição'}</span><input type="checkbox" checked={situacaoFinal} onChange={(event) => setSituacaoFinal(event.target.checked)} /> Sim</label>
           </div>
           <div className="administracao-form-actions"><button type="button" className="administracao-button administracao-button--secondary" onClick={() => setFormAberto(false)}>Cancelar</button><button type="button" className="administracao-button administracao-button--primary" onClick={() => void salvar()}>Salvar</button></div>
         </div>

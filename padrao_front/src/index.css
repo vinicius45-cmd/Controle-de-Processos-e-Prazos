@@ -333,6 +333,33 @@ body {
   margin-top: 6px;
 }
 
+.app-sidebar__brand-text {
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+  min-height: 58px;
+  padding: 12px 12px 10px;
+  text-align: left;
+}
+
+.app-sidebar__brand-text strong {
+  color: #ffffff;
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.app-sidebar__brand-text span {
+  color: rgba(219, 231, 248, 0.76);
+  font-size: 0.74rem;
+  line-height: 1.2;
+  margin-top: 2px;
+}
 .app-sidebar__icon-button,
 .app-sidebar__collapse {
   align-items: center;
@@ -861,10 +888,51 @@ body {
 
 .management-heading__actions {
   align-items: center;
-  color: #1c2d4b;
   display: flex;
-  font-size: 1.08rem;
-  gap: 21px;
+  gap: 12px;
+}
+
+.management-heading__action {
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(28, 45, 75, 0.14);
+  border-radius: 999px;
+  color: #1c2d4b;
+  cursor: pointer;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  width: 36px;
+}
+
+.management-heading__action:hover {
+  background: rgba(19, 93, 255, 0.04);
+  border-color: rgba(19, 93, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.management-heading__action--alert {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.management-heading__badge {
+  align-items: center;
+  background: #d92525;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.56rem;
+  font-weight: 700;
+  height: 16px;
+  justify-content: center;
+  min-width: 16px;
+  padding: 0 4px;
+  position: absolute;
+  right: -2px;
+  top: -2px;
 }
 
 .management-filters {
@@ -938,8 +1006,42 @@ body {
 }
 
 .management-metric--red {
-  background: #fff7f7;
-  border: 2px solid #f06464;
+  background: #ffffff;
+  border: 1px solid #e1e8f1;
+}
+
+.management-metric.is-selected {
+  box-shadow: 0 8px 18px rgba(19, 84, 174, 0.10);
+}
+
+.management-metric--blue.is-selected {
+  background: #edf5ff;
+  border-color: #2d74d6;
+}
+
+.management-metric--red.is-selected {
+  background: #fff2f2;
+  border-color: #e13b3b;
+}
+
+.management-metric--orange.is-selected {
+  background: #fff8ea;
+  border-color: #ea9d12;
+}
+
+.management-metric--green.is-selected {
+  background: #edf9f0;
+  border-color: #2d8f57;
+}
+
+.management-metric--purple.is-selected {
+  background: #f5f0ff;
+  border-color: #7752bd;
+}
+
+.management-metric--sky.is-selected {
+  background: #f2f2f2;
+  border-color: #1a1a1a;
 }
 
 .management-metric__icon {
@@ -954,11 +1056,12 @@ body {
   width: 42px;
 }
 
+.management-metric--blue .management-metric__icon { background: #2d74d6; color: #ffffff; }
 .management-metric--red .management-metric__icon { background: #e52d32; color: #ffffff; }
-.management-metric--orange .management-metric__icon { background: #fff0c9; color: #f18b00; }
-.management-metric--green .management-metric__icon { background: #e1f4e7; color: #2d9053; }
-.management-metric--purple .management-metric__icon { background: #ede4fa; color: #7541a9; }
-.management-metric--sky .management-metric__icon { background: #e1efff; color: #2468c5; }
+.management-metric--orange .management-metric__icon { background: #f7a722; color: #ffffff; }
+.management-metric--green .management-metric__icon { background: #2d9053; color: #ffffff; }
+.management-metric--purple .management-metric__icon { background: #8a5bd6; color: #ffffff; }
+.management-metric--sky .management-metric__icon { background: #111111; color: #ffffff; }
 
 .management-metric__copy {
   display: flex;
@@ -982,10 +1085,19 @@ body {
   margin: 3px 0 5px;
 }
 
+.management-metric--blue .management-metric__copy strong { color: #1763c4; }
 .management-metric--red .management-metric__copy strong { color: #dc252b; }
 .management-metric--orange .management-metric__copy strong { color: #e88800; }
 .management-metric--green .management-metric__copy strong { color: #27844a; }
 .management-metric--purple .management-metric__copy strong { color: #7140a4; }
+.management-metric--sky .management-metric__copy strong { color: #111111; }
+
+.management-metric--blue.is-selected .management-metric__copy strong { color: #1763c4; }
+.management-metric--red.is-selected .management-metric__copy strong { color: #dc252b; }
+.management-metric--orange.is-selected .management-metric__copy strong { color: #e88800; }
+.management-metric--green.is-selected .management-metric__copy strong { color: #27844a; }
+.management-metric--purple.is-selected .management-metric__copy strong { color: #7140a4; }
+.management-metric--sky.is-selected .management-metric__copy strong { color: #111111; }
 
 .management-metric__copy em {
   color: #1357b3;

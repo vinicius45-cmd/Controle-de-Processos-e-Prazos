@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ClipboardList,
   AlertTriangle,
+  ArrowRight,
+  Bell,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
   Clock3,
+  HelpCircle,
+  ClipboardList,
   Droplet,
   Eye,
   EyeOff,
@@ -451,7 +454,18 @@ export const Dashboard: React.FC = () => {
     <section className="dashboard-page dashboard-page--management" aria-label="Dashboard de processos">
       <header className="management-heading">
         <h1>ASSAD <span>— Gestão de Processos</span></h1>
-        <div className="management-heading__actions"><span>♧</span><span>?</span><span>⇥</span></div>
+        <div className="management-heading__actions" aria-label="Ações rápidas do dashboard">
+          <button type="button" className="management-heading__action management-heading__action--alert" aria-label="Notificações">
+            <Bell size={18} />
+            <span className="management-heading__badge">3</span>
+          </button>
+          <button type="button" className="management-heading__action" aria-label="Ajuda">
+            <HelpCircle size={18} />
+          </button>
+          <button type="button" className="management-heading__action" aria-label="Abrir painel de ações">
+            <ArrowRight size={18} />
+          </button>
+        </div>
       </header>
 
       <div className="management-filters" aria-label="Filtros de processos">
@@ -471,7 +485,9 @@ export const Dashboard: React.FC = () => {
           { label: 'Para assinatura', value: '7', tone: 'sky', icon: PenLine, filter: 'Para Assinatura' }
         ].map((card) => {
           const Icon = card.icon;
-          return <button className={`management-metric management-metric--${card.tone}`} key={card.label} onClick={() => handleSelecionarCard(card.filter)} type="button">
+          const estaSelecionado = filtroAtivo === card.filter;
+
+          return <button className={`management-metric management-metric--${card.tone}${estaSelecionado ? ' is-selected' : ''}`} key={card.label} onClick={() => handleSelecionarCard(card.filter)} type="button">
             <span className="management-metric__icon"><Icon size={21} /></span>
             <span className="management-metric__copy"><small>{card.label}</small><strong>{card.value}</strong><em>Ver processos <span>→</span></em></span>
           </button>;
