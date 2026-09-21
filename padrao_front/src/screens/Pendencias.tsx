@@ -13,7 +13,7 @@ interface ColumnConfig {
 
 const COLUNAS: ColumnConfig[] = [
   { id: 'atrasado', titulo: 'Atrasados', corHex: '#ef5350', corClasse: 'pendencias-column--atrasado' },
-  { id: 'vence_hoje', titulo: 'Vence Hoje', corHex: '#ff9800', corClasse: 'pendencias-column--vence-hoje' },
+  { id: 'vence_hoje', titulo: 'Vence Hoje', corHex: '#ff5c00', corClasse: 'pendencias-column--vence-hoje' },
   { id: 'proximos_5_dias', titulo: 'Próximos 5 dias', corHex: '#fbc02d', corClasse: 'pendencias-column--proximos' },
   { id: 'para_assinatura', titulo: 'Para Assinatura', corHex: '#2196f3', corClasse: 'pendencias-column--assinatura' },
   { id: 'especiais', titulo: 'Especiais', corHex: '#7F00FF', corClasse: 'pendencias-column--especiais' },

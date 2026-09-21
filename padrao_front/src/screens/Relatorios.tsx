@@ -70,8 +70,8 @@ const processosRelatorio: ProcessoRelatorio[] = [
 
 const statusColors: Record<StatusProcesso, string> = {
   Atrasado: '#ef4444',
-  'Vence Hoje': '#f97316',
-  'Próximo do prazo': '#22c55e',
+  'Vence Hoje': '#ff5c00',
+  'Próximo do prazo': '#ffb300',
   'Para Assinatura': '#f59e0b',
   Especial: '#8b5cf6',
   OK: '#2563eb'
@@ -138,8 +138,8 @@ const buildPrazos = (processos: ProcessoRelatorio[]): MetricaGrafico[] => {
 
   return [
     { label: 'Vencidos', valor: agrupado.vencidos, porcentagem: getPercentual(agrupado.vencidos, total), cor: '#ef4444' },
-    { label: 'Vence hoje', valor: agrupado.venceHoje, porcentagem: getPercentual(agrupado.venceHoje, total), cor: '#f97316' },
-    { label: 'Próx. 5 dias', valor: agrupado.proximos5, porcentagem: getPercentual(agrupado.proximos5, total), cor: '#22c55e' },
+    { label: 'Vence hoje', valor: agrupado.venceHoje, porcentagem: getPercentual(agrupado.venceHoje, total), cor: '#ff5c00' },
+    { label: 'Próx. 5 dias', valor: agrupado.proximos5, porcentagem: getPercentual(agrupado.proximos5, total), cor: '#ffb300' },
     { label: 'Após 5 dias', valor: agrupado.depois5, porcentagem: getPercentual(agrupado.depois5, total), cor: '#2563eb' }
   ];
 };

@@ -480,7 +480,7 @@ export const Dashboard: React.FC = () => {
           { label: 'Processos ativos', value: '127', tone: 'blue', icon: ClipboardList, filter: 'Total de Processos' },
           { label: 'Atrasados', value: '14', tone: 'red', icon: AlertTriangle, filter: 'Atrasados' },
           { label: 'Vencem hoje', value: '5', tone: 'orange', icon: Clock3, filter: 'Vence Hoje' },
-          { label: 'Próx. 5 dias', value: '22', tone: 'green', icon: CalendarDays, filter: 'Próximos 5 dias' },
+          { label: 'Próx. 5 dias', value: '22', tone: 'yellow', icon: CalendarDays, filter: 'Próximos 5 dias' },
           { label: 'Aguardando retorno', value: '38', tone: 'purple', icon: RotateCcw, filter: 'Aguardando retorno' },
           { label: 'Para assinatura', value: '7', tone: 'sky', icon: PenLine, filter: 'Para Assinatura' }
         ].map((card) => {

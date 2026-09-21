@@ -59,6 +59,7 @@ const CadastrodeProcesso: React.FC = () => {
   const [processosFiltrados, setProcessosFiltrados] = useState<FormCadastro[]>([]);
   const [mostrarResumo, setMostrarResumo] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(modoEdicao);
+  const [filtroProcessos, setFiltroProcessos] = useState<string | null>(null);
 
   // Calcula dias restantes baseado nas datas
   const parseDateLocal = (dateStr: string): Date => {
@@ -355,6 +356,7 @@ const CadastrodeProcesso: React.FC = () => {
 
   const getStatusLabel = (processo: FormCadastro): string => {
     if (processo.situacaoProcesso === 'concluido') return 'Concluído';
+    if (getDays(processo) === 0) return 'Vence hoje';
     if (['3', '7'].includes(processo.id || '')) return 'Para assinatura';
     if (processo.situacaoProcesso === 'parado') return 'Aguardando retorno';
     return 'Em acompanhamento';
@@ -362,6 +364,7 @@ const CadastrodeProcesso: React.FC = () => {
 
   const getStatusClass = (processo: FormCadastro): string => {
     if (processo.situacaoProcesso === 'concluido') return 'is-complete';
+    if (getDays(processo) === 0) return 'is-today';
     if (['3', '7'].includes(processo.id || '')) return 'is-signature';
     if (processo.situacaoProcesso === 'parado') return 'is-return';
     return 'is-progress';
@@ -383,18 +386,45 @@ const CadastrodeProcesso: React.FC = () => {
     return `process-list-page__days ${getStatusClass(processo)}`;
   };
 
+  const processoPertenceAoFiltro = (processo: FormCadastro, filtro: string | null): boolean => {
+    if (!filtro) return true;
+
+    const dias = getDays(processo);
+
+    switch (filtro) {
+      case 'atrasados':
+        return typeof dias === 'number' && dias < 0;
+      case 'vence-hoje':
+        return dias === 0;
+      case 'proximos-5-dias':
+        return typeof dias === 'number' && dias > 0 && dias <= 5;
+      case 'aguardando-retorno':
+        return getStatusClass(processo) === 'is-return';
+      case 'para-assinatura':
+        return getStatusClass(processo) === 'is-signature';
+      case 'concluidos':
+        return getStatusClass(processo) === 'is-complete';
+      default:
+        return true;
+    }
+  };
+
   if (!mostrarFormulario) {
     const lista = processosTabela.filter((processo) => {
       const termo = busca.toLowerCase();
       const combinaBusca = !termo || `${processo.processoINCRA} ${processo.assunto} ${processo.orgaoOrigem}`.toLowerCase().includes(termo);
       const combinaFiltro = !form.filtroRespostas || processo.filtroRespostas;
-      return combinaBusca && combinaFiltro;
+      return combinaBusca && combinaFiltro && processoPertenceAoFiltro(processo, filtroProcessos);
     });
+
+    const selecionarFiltro = (filtro: string | null): void => {
+      setFiltroProcessos(filtro);
+    };
 
     return (
       <section className="process-list-page" aria-label="Processos">
         <div className="process-list-page__toolbar"><label><Search size={17} /><input value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Processo SEI ou assunto..." /></label><button className="process-list-page__new" type="button" onClick={() => setMostrarFormulario(true)}><Plus size={17} /> Novo processo</button><button className="process-list-page__filter" type="button"><Filter size={16} /> Filtros avançados</button></div>
-        <nav className="process-list-page__tabs"><button className="is-active" type="button" onClick={() => setBusca('')}>Todos</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--late" />Atrasados</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--today" />Vence hoje</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--soon" />Próx. 5 dias</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--return" />Aguardando retorno</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--signature" />Para assinatura</button><button type="button"><i className="process-list-page__tab-dot process-list-page__tab-dot--complete">✓</i>Concluídos</button></nav>
+        <nav className="process-list-page__tabs"><button className={!filtroProcessos ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro(null)}>Todos</button><button className={filtroProcessos === 'atrasados' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('atrasados')}><i className="process-list-page__tab-dot process-list-page__tab-dot--late" />Atrasados</button><button className={filtroProcessos === 'vence-hoje' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('vence-hoje')}><i className="process-list-page__tab-dot process-list-page__tab-dot--today" />Vence hoje</button><button className={filtroProcessos === 'proximos-5-dias' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('proximos-5-dias')}><i className="process-list-page__tab-dot process-list-page__tab-dot--soon" />Próx. 5 dias</button><button className={filtroProcessos === 'aguardando-retorno' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('aguardando-retorno')}><i className="process-list-page__tab-dot process-list-page__tab-dot--return" />Aguardando retorno</button><button className={filtroProcessos === 'para-assinatura' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('para-assinatura')}><i className="process-list-page__tab-dot process-list-page__tab-dot--signature" />Para assinatura</button><button className={filtroProcessos === 'concluidos' ? 'is-active' : ''} type="button" onClick={() => selecionarFiltro('concluidos')}><i className="process-list-page__tab-dot process-list-page__tab-dot--complete">✓</i>Concluídos</button></nav>
         <section className="process-list-page__table-card"><div className="process-list-page__table-wrap"><table><colgroup><col className="process-list-page__col-chevron" /><col className="process-list-page__col-sei" /><col className="process-list-page__col-subject" /><col className="process-list-page__col-entity" /><col className="process-list-page__col-status" /><col className="process-list-page__col-deadline" /><col className="process-list-page__col-days" /><col className="process-list-page__col-pending" /><col className="process-list-page__col-action" /></colgroup><thead><tr><th></th><th>Processo SEI <span>⌃</span></th><th>Assunto</th><th>Ente</th><th>Situação</th><th>Prazo <CalendarDays size={13} /></th><th>Dias <span>ⓘ</span></th><th>Pendências</th><th></th></tr></thead><tbody>{lista.map((processo, index) => {
           const dias = getDays(processo);
           const concluido = processo.situacaoProcesso === 'concluido';

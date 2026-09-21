@@ -1029,13 +1029,13 @@ body {
 }
 
 .management-metric--orange.is-selected {
-  background: #fff8ea;
-  border-color: #ea9d12;
+  background: #fff0e6;
+  border-color: #ff5c00;
 }
 
-.management-metric--green.is-selected {
-  background: #edf9f0;
-  border-color: #2d8f57;
+.management-metric--yellow.is-selected {
+  background: #fff8d6;
+  border-color: #e4a900;
 }
 
 .management-metric--purple.is-selected {
@@ -1062,7 +1062,8 @@ body {
 
 .management-metric--blue .management-metric__icon { background: #2d74d6; color: #ffffff; }
 .management-metric--red .management-metric__icon { background: #e52d32; color: #ffffff; }
-.management-metric--orange .management-metric__icon { background: #f7a722; color: #ffffff; }
+.management-metric--orange .management-metric__icon { background: #ff5c00; color: #ffffff; }
+.management-metric--yellow .management-metric__icon { background: #ffb300; color: #ffffff; }
 .management-metric--green .management-metric__icon { background: #2d9053; color: #ffffff; }
 .management-metric--purple .management-metric__icon { background: #8a5bd6; color: #ffffff; }
 .management-metric--sky .management-metric__icon { background: #111111; color: #ffffff; }
@@ -1091,14 +1092,16 @@ body {
 
 .management-metric--blue .management-metric__copy strong { color: #1763c4; }
 .management-metric--red .management-metric__copy strong { color: #dc252b; }
-.management-metric--orange .management-metric__copy strong { color: #e88800; }
+.management-metric--orange .management-metric__copy strong { color: #ff5c00; }
+.management-metric--yellow .management-metric__copy strong { color: #ce8a05; }
 .management-metric--green .management-metric__copy strong { color: #27844a; }
 .management-metric--purple .management-metric__copy strong { color: #7140a4; }
 .management-metric--sky .management-metric__copy strong { color: #111111; }
 
 .management-metric--blue.is-selected .management-metric__copy strong { color: #1763c4; }
 .management-metric--red.is-selected .management-metric__copy strong { color: #dc252b; }
-.management-metric--orange.is-selected .management-metric__copy strong { color: #e88800; }
+.management-metric--orange.is-selected .management-metric__copy strong { color: #ff5c00; }
+.management-metric--yellow.is-selected .management-metric__copy strong { color: #ce8a05; }
 .management-metric--green.is-selected .management-metric__copy strong { color: #27844a; }
 .management-metric--purple.is-selected .management-metric__copy strong { color: #7140a4; }
 .management-metric--sky.is-selected .management-metric__copy strong { color: #111111; }
@@ -1144,8 +1147,8 @@ body {
 }
 
 .management-tabs button:nth-child(2) svg { color: #ec4141; }
-.management-tabs button:nth-child(3) svg { color: #59677b; }
-.management-tabs button:nth-child(4) svg { color: #35955b; }
+.management-tabs button:nth-child(3) svg { color: #ff5c00; }
+.management-tabs button:nth-child(4) svg { color: #ffb300; }
 .management-tabs button:nth-child(5) svg { color: #7650af; }
 .management-tabs button:nth-child(6) svg { color: #3767a9; }
 .management-tabs button:nth-child(7) svg { color: #3aa36b; }
@@ -1231,7 +1234,7 @@ body {
 }
 
 .management-status--atrasado { background: #ffe0e0; color: #d64040; }
-.management-status--vence-hoje { background: #fff0d3; color: #e88100; }
+.management-status--vence-hoje { background: #fff0e6; color: #ff5c00; }
 .management-status--proximo { background: #fff0cd; color: #ce8a05; }
 .management-status--assinatura { background: #f3f4f6; color: #111111; }
 .management-status--ok { background: #e0f2e5; color: #348052; }
@@ -1752,7 +1755,7 @@ body {
 }
 
 .dashboard-badge--atrasado { background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; }
-.dashboard-badge--vence-hoje { background: #ffedd5; border: 1px solid #fdba74; color: #f97316; }
+.dashboard-badge--vence-hoje { background: #fff0e6; border: 1px solid #ff5c00; color: #ff5c00; }
 .dashboard-badge--proximo { background: #fef3c7; border: 1px solid #fcd34d; color: #b45309; }
 .dashboard-badge--assinatura { background: #f3f4f6; border: 1px solid #d1d5db; color: #111111; }
 .dashboard-badge--especial { background: #ede9fe; border: 1px solid #c4b5fd; color: #6d28d9; }
@@ -1766,7 +1769,7 @@ body {
 }
 
 .dashboard-table__days--late { color: #ef4444; }
-.dashboard-table__days--today { color: #f97316; }
+.dashboard-table__days--today { color: #ff5c00; }
 .dashboard-table__days--ok { color: #14915f; }
 
 .dashboard-actions {
