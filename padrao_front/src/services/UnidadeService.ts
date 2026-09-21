@@ -7,9 +7,7 @@ type DadosUnidade = Pick<Unidade, 'nmUnidade' | 'sgUnidade' | 'idUnidadeSuperior
 export const UnidadeService = {
   async listar(filtro = '', apenasAtivas = true): Promise<Unidade[]> {
     try {
-      const { data } = await api.get<Unidade[]>('/unidades', {
-        params: { filtro, ...(apenasAtivas ? { blAtivo: 'S' } : {}) }
-      });
+      const { data } = await api.get<Unidade[]>(apenasAtivas ? '/unidades/ativas' : '/unidades');
       return data;
     } catch {
       const termo = filtro.trim().toLowerCase();
@@ -37,7 +35,7 @@ export const UnidadeService = {
 
   async atualizar(idUnidade: number, dados: DadosUnidade): Promise<Unidade> {
     try {
-      const { data } = await api.put<Unidade>(`/unidades/${idUnidade}`, dados);
+      const { data } = await api.patch<Unidade>(`/unidades/${idUnidade}`, dados);
       return data;
     } catch {
       const indice = localMockUnidades.findIndex((item) => item.idUnidade === idUnidade);

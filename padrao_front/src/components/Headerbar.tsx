@@ -7,15 +7,11 @@ import {
 } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { useAuth } from '../hooks/useAuth';
-import { useModules } from '../hooks/useModules';
 
 export const Headerbar: React.FC = () => {
   const { fazerLogout, usuario } = useAuth();
-  const { activeModuleId, activeSubMenuId, navegarPara } = useApp();
+  const { activeModuleId, navegarPara } = useApp();
   const [cadastroFormularioAberto, setCadastroFormularioAberto] = useState(false);
-  const { modulos } = useModules();
-  const activeModule = modulos.find((module) => module.id === activeModuleId);
-  const activeSubmenu = activeModule?.subMenus?.find((submenu) => submenu.id === activeSubMenuId);
   const telaCadastro = activeModuleId === 'cadastro-processo';
   const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'pendencias', 'para-assinatura', 'relatorios', 'alertas', 'administracao'].includes(activeModuleId ?? '');
   const mostrarBotaoRetorno = telaCadastro && cadastroFormularioAberto;

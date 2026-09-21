@@ -211,6 +211,10 @@
   font-size: 0.58rem;
   font-weight: 900;
   justify-content: center;
+  line-height: 1;
+  padding: 0;
+  text-align: center;
+  text-indent: -2px;
 }
 
 .process-list-page__table-card {

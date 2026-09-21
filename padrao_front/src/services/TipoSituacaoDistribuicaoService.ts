@@ -7,7 +7,7 @@ type DadosTipoSituacaoDistribuicao = Pick<TipoSituacaoDistribuicao, 'nmTipoSitua
 export const TipoSituacaoDistribuicaoService = {
   async listar(filtro = '', apenasAtivos = true): Promise<TipoSituacaoDistribuicao[]> {
     try {
-      const { data } = await api.get<TipoSituacaoDistribuicao[]>('/tipos-situacao-distribuicao', { params: { filtro, ...(apenasAtivos ? { blAtivo: 'S' } : {}) } });
+      const { data } = await api.get<TipoSituacaoDistribuicao[]>('/dom-tipo-situacao-distribuicao');
       return data;
     } catch {
       const termo = filtro.trim().toLowerCase();

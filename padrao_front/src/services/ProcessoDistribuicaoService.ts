@@ -7,7 +7,7 @@ type DadosDistribuicao = Pick<ProcessoDistribuicao, 'idProcesso' | 'idUnidade' |
 export const ProcessoDistribuicaoService = {
   async listarPorProcesso(idProcesso: number | string): Promise<ProcessoDistribuicao[]> {
     try {
-      const { data } = await api.get<ProcessoDistribuicao[]>(`/processos/${idProcesso}/distribuicoes`);
+      const { data } = await api.get<ProcessoDistribuicao[]>(`/processos-distribuicoes/processo/${idProcesso}`);
       return data;
     } catch {
       return localMockProcessosDistribuicoes.filter((item) => String(item.idProcesso) === String(idProcesso));

@@ -17,12 +17,13 @@ const possuiCicloLocal = (idUnidade: number, idUnidadeSuperior: number | null | 
 };
 
 export const UnidadeHierarquiaService = {
-  async listarVigentes(): Promise<UnidadeHierarquia[]> {
+  async listarVigentes(idUnidades: number[] = []): Promise<UnidadeHierarquia[]> {
+    if (idUnidades.length === 0) return localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S');
     try {
-      const { data } = await api.get<UnidadeHierarquia[]>('/unidades-hierarquias/vigentes');
-      return data;
+      const respostas = await Promise.all(idUnidades.map((idUnidade) => this.vigentesDaUnidade(idUnidade)));
+      return respostas.flat();
     } catch {
-      return localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S');
+      return localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S' && idUnidades.includes(item.idUnidade));
     }
   },
 

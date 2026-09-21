@@ -7,7 +7,7 @@ type DadosTipoSituacaoProcesso = Pick<TipoSituacaoProcesso, 'nmTipoSituacaoProce
 export const TipoSituacaoProcessoService = {
   async listar(filtro = '', apenasAtivos = true): Promise<TipoSituacaoProcesso[]> {
     try {
-      const { data } = await api.get<TipoSituacaoProcesso[]>('/tipos-situacao-processo', { params: { filtro, ...(apenasAtivos ? { blAtivo: 'S' } : {}) } });
+      const { data } = await api.get<TipoSituacaoProcesso[]>('/dom-tipo-situacao-processo');
       return data;
     } catch {
       const termo = filtro.trim().toLowerCase();

@@ -8,7 +8,7 @@ export const cdpService = {
   // Login LDAP
   async login(nickname: string, passwordPlana: string): Promise<LoginResponse> {
     try {
-      const response = await api.post<LoginResponse>('/auth-ldap/auth/ldap/login', {
+      const response = await api.post<LoginResponse>('/auth/login', {
         email: nickname.trim(),
         password: passwordPlana
       });

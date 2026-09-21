@@ -5,10 +5,12 @@ import { Ente } from '../types';
 export const EnteService = {
   async listar(filtro = '', apenasAtivos = true): Promise<Ente[]> {
     try {
-      const { data } = await api.get<Ente[]>('/entes', {
-        params: { filtro, ...(apenasAtivos ? { blAtivo: 'S' } : {}) }
-      });
-      return data;
+      const { data } = await api.get<Ente[]>('/dom-entes');
+      const termo = filtro.trim().toLowerCase();
+      return data.filter((ente) => (
+        (!apenasAtivos || ente.blAtivo === 'S') &&
+        (!termo || `${ente.nmEnte} ${ente.sgEnte}`.toLowerCase().includes(termo))
+      ));
     } catch {
       const termo = filtro.trim().toLowerCase();
       return localMockEntes.filter((ente) => (
@@ -20,7 +22,7 @@ export const EnteService = {
 
   async cadastrar(dados: Pick<Ente, 'nmEnte' | 'sgEnte'>): Promise<Ente> {
     try {
-      const { data } = await api.post<Ente>('/entes', {
+      const { data } = await api.post<Ente>('/dom-entes', {
         ...dados,
         blAtivo: 'S'
       });
@@ -38,7 +40,7 @@ export const EnteService = {
 
   async atualizar(idEnte: number, dados: Pick<Ente, 'nmEnte' | 'sgEnte'>): Promise<Ente> {
     try {
-      const { data } = await api.put<Ente>(`/entes/${idEnte}`, dados);
+      const { data } = await api.put<Ente>(`/dom-entes/${idEnte}`, dados);
       return data;
     } catch {
       const indice = localMockEntes.findIndex((ente) => ente.idEnte === idEnte);
@@ -50,7 +52,7 @@ export const EnteService = {
 
   async desativar(idEnte: number): Promise<void> {
     try {
-      await api.patch(`/entes/${idEnte}/desativar`);
+      await api.patch(`/dom-entes/${idEnte}/desativar`);
     } catch {
       const ente = localMockEntes.find((item) => item.idEnte === idEnte);
       if (ente) ente.blAtivo = 'N';

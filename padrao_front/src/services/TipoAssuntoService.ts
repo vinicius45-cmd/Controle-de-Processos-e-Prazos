@@ -7,7 +7,7 @@ type DadosTipoAssunto = Pick<TipoAssunto, 'idUnidade' | 'nmTipoAssunto'>;
 export const TipoAssuntoService = {
   async listar(idUnidade?: number, filtro = '', apenasAtivos = true): Promise<TipoAssunto[]> {
     try {
-      const { data } = await api.get<TipoAssunto[]>('/tipos-assunto', { params: { idUnidade, filtro, ...(apenasAtivos ? { blAtivo: 'S' } : {}) } });
+      const { data } = await api.get<TipoAssunto[]>('/dom-tipo-assunto');
       return data;
     } catch {
       const termo = filtro.trim().toLowerCase();

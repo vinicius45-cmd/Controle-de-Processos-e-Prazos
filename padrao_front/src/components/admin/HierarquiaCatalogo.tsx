@@ -17,10 +17,8 @@ const HierarquiaCatalogo: React.FC = () => {
   const [hierarquiasVigentes, setHierarquiasVigentes] = useState<UnidadeHierarquia[]>([]);
 
   const carregarUnidades = async (): Promise<void> => {
-    const [listaUnidades, listaHierarquias] = await Promise.all([
-      UnidadeService.listar('', false),
-      UnidadeHierarquiaService.listarVigentes()
-    ]);
+    const listaUnidades = await UnidadeService.listar('', false);
+    const listaHierarquias = await UnidadeHierarquiaService.listarVigentes(listaUnidades.map((item) => item.idUnidade));
     setUnidades(listaUnidades);
     setHierarquiasVigentes(listaHierarquias);
   };

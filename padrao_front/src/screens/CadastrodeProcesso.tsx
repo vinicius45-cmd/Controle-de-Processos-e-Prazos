@@ -333,14 +333,6 @@ const CadastrodeProcesso: React.FC = () => {
     setMostrarListaProcessos(false);
   };
 
-  const deletarProcesso = async (id: string | undefined): Promise<void> => {
-    if (!id) return;
-    const processos = processosSalvos.filter((p) => p.id !== id);
-    await ProcessoService.excluir(id);
-    setProcessosSalvos(processos);
-    alert('Processo deletado com sucesso!');
-  };
-
   const processosTabela: FormCadastro[] = processosSalvos.length > 0 ? processosSalvos : [
     { processoINCRA: '00090-00012345/2026-11', requerimento: '', assunto: 'Informações STPC', assuntoTipo: 'Ofício', destinatario: 'Suop', solicitudesInformacao: [], orgaoOrigem: 'TCDF', dataEntrada: '2026-05-28', prazoAreaTecnica: '', prazoFinal: '2026-08-30', situacaoProcesso: 'parado', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '1' },
     { processoINCRA: '00090-00054321/2026-17', requerimento: '', assunto: 'Indicação nº 123', assuntoTipo: 'Indicação', destinatario: 'Sufisa', solicitudesInformacao: [], orgaoOrigem: 'CLDF', dataEntrada: '2026-06-01', prazoAreaTecnica: '', prazoFinal: '2026-09-05', situacaoProcesso: 'em-andamento', responsavel: '', documentoSEI: '', especial: false, filtroRespostas: false, observacao: '', id: '2' },
@@ -573,13 +565,6 @@ const CadastrodeProcesso: React.FC = () => {
                             className="btn btn-primary btn-small"
                           >
                             Carregar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => deletarProcesso(processo.id)}
-                            className="btn btn-danger btn-small"
-                          >
-                            Deletar
                           </button>
                         </div>
                       </div>
@@ -868,7 +853,7 @@ const CadastrodeProcesso: React.FC = () => {
                   type="checkbox"
                   id="especial"
                   name="especial"
-                  checked={form.especial}
+                  checked={form.especial ?? false}
                   onChange={handleInputChange}
                 />
                 <label htmlFor="especial" className="checkbox-label">

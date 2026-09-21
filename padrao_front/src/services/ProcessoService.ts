@@ -47,7 +47,7 @@ export const ProcessoService = {
 
     try {
       const { data } = processo.id
-        ? await api.put<Processo>(`/processos/${processo.id}`, payload)
+        ? await api.patch<Processo>(`/processos/${processo.id}`, payload)
         : await api.post<Processo>('/processos', payload);
       return data;
     } catch {
@@ -59,13 +59,6 @@ export const ProcessoService = {
     }
   },
 
-  async excluir(idProcesso: number | string): Promise<void> {
-    try {
-      await api.delete(`/processos/${idProcesso}`);
-    } catch {
-      salvarLocalmente(lerLocalmente().filter((item) => String(item.id) !== String(idProcesso)));
-    }
-  }
 };
 
 export default ProcessoService;
