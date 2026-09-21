@@ -204,7 +204,7 @@ body {
 
 .app-content__empty p {
   color: var(--semob-text-muted);
-  font-size: 0.9rem;
+  font-size: 2rem;
 }
 
 .app-footer {
@@ -589,12 +589,12 @@ body {
   align-items: center;
   background: transparent;
   border: 0;
-  color: #000000;
+  color: #0759d7;
   cursor: pointer;
   display: inline-flex;
-  font-size: 30px;
+  font-size: 0.9rem;
   font-weight: 700;
-  gap: 8px;
+  gap: 7px;
   padding: 0;
 }
 
@@ -1519,6 +1519,8 @@ body {
 }
 
 .process-form__summary {
+  min-width: 0;
+  overflow: hidden;
   padding: 16px 15px;
 }
 
@@ -1529,11 +1531,15 @@ body {
   justify-content: space-between;
   min-height: 34px;
   gap: 10px;
+  min-width: 0;
 }
 
 .process-form__summary-row span,
 .process-form__summary-row strong {
   font-size: 0.66rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .process-form__summary-row span {
@@ -1542,6 +1548,7 @@ body {
 
 .process-form__summary-row strong {
   color: #8793a6;
+  flex: 0 1 52%;
   font-weight: 700;
   text-align: right;
 }

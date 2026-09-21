@@ -35,7 +35,7 @@ const CadastrodeProcesso: React.FC = () => {
     responsavel: '',
     documentoSEI: '',
     idTipoDocumento: null,
-    especial: false,
+    especial: null,
     filtroRespostas: false,
     observacao: '',
   });
@@ -185,6 +185,12 @@ const CadastrodeProcesso: React.FC = () => {
     return () => window.removeEventListener('processo:voltar-lista', voltarParaLista);
   }, [definirProcessoSelecionado]);
 
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('cadastro:formulario-estado', {
+      detail: { aberto: mostrarFormulario },
+    }));
+  }, [mostrarFormulario]);
+
   // Filtra processos quando há alteração na busca ou no filtro de respostas
   useEffect(() => {
     const filtrados = processosSalvos.filter((processo) => {
@@ -222,7 +228,7 @@ const CadastrodeProcesso: React.FC = () => {
         ...prev,
         [name]: target.checked,
       }));
-    } else if (name === 'idEnte' || name === 'idUnidade' || name === 'idTipoSituacaoProcesso') {
+    } else if (name === 'idEnte' || name === 'idUnidade' || name === 'idTipoSituacaoProcesso' || name === 'idTipoDocumento' || name === 'idTipoAssunto') {
       setForm((prev) => ({
         ...prev,
         [name]: value ? Number(value) : null,
@@ -308,7 +314,7 @@ const CadastrodeProcesso: React.FC = () => {
       responsavel: '',
       documentoSEI: '',
       idTipoDocumento: null,
-      especial: false,
+      especial: null,
       filtroRespostas: false,
       observacao: '',
     });
@@ -407,7 +413,7 @@ const CadastrodeProcesso: React.FC = () => {
     ['Nº do documento', form.requerimento],
     ['Tipo de assunto', tiposAssunto.find((tipo) => tipo.idTipoAssunto === form.idTipoAssunto)?.nmTipoAssunto],
     ['Assunto', form.assunto],
-    ['Especial', form.especial ? 'Sim' : 'Não'],
+    ['Processo especial', form.especial === null ? undefined : form.especial ? 'Sim' : 'Não'],
     ['Data de entrada', form.dataEntrada],
     ['Prazo final', form.prazoFinal],
     ['Observações', form.observacao],
@@ -450,7 +456,7 @@ const CadastrodeProcesso: React.FC = () => {
             <div className="process-form__grid process-form__grid--subject">
               <label className="process-form__field"><span>Tipo de assunto <b>*</b></span><select name="idTipoAssunto" value={form.idTipoAssunto ?? ''} onChange={handleInputChange} required><option value="">Selecione o tipo de assunto</option>{tiposAssunto.map((tipo) => <option key={tipo.idTipoAssunto} value={tipo.idTipoAssunto}>{tipo.nmTipoAssunto}</option>)}</select></label>
               <label className="process-form__field"><span>Assunto <b>*</b></span><div className="process-form__textarea-wrap"><textarea name="assunto" value={form.assunto} onChange={handleInputChange} placeholder="Descreva o assunto do processo" maxLength={60} required /><small>{form.assunto.length}/60</small></div></label>
-              <label className="process-form__field"><span>Processo especial <Info size={13} /></span><select name="especial" value={form.especial ? 'sim' : 'nao'} onChange={(event) => setForm((prev) => ({ ...prev, especial: event.target.value === 'sim' }))}><option value="nao">Não</option><option value="sim">Sim</option></select></label>
+              <label className="process-form__field"><span>Processo especial <Info size={13} /></span><select name="especial" value={form.especial === null ? '' : form.especial ? 'sim' : 'nao'} onChange={(event) => setForm((prev) => ({ ...prev, especial: event.target.value === '' ? null : event.target.value === 'sim' }))}><option value="">Selecione uma opção</option><option value="nao">Não</option><option value="sim">Sim</option></select></label>
             </div>
           </section>
 

@@ -167,7 +167,7 @@ export const localMockUnidadesHierarquia: UnidadeHierarquia[] = [
 ];
 
 export const localMockTiposAssunto: TipoAssunto[] = [
-  { idTipoAssunto: 1, idUnidade: 1, nmTipoAssunto: 'Ofício', blAtivo: 'S' },
+  { idTipoAssunto: 1, idUnidade: 1, nmTipoAssunto: 'Ofício', blAtivo: 'N' },
   { idTipoAssunto: 2, idUnidade: 1, nmTipoAssunto: 'Requerimento', blAtivo: 'S' },
   { idTipoAssunto: 3, idUnidade: 3, nmTipoAssunto: 'Denúncia', blAtivo: 'S' },
   { idTipoAssunto: 4, idUnidade: 3, nmTipoAssunto: 'Indicação', blAtivo: 'S' },

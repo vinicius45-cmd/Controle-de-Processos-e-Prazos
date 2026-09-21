@@ -140,7 +140,7 @@ export interface FormCadastro {
   responsavel: string;
   documentoSEI: string;
   idTipoDocumento?: number | null;
-  especial: boolean;
+  especial: boolean | null;
   filtroRespostas: boolean;
   observacao: string;
 }

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ArrowLeft,
   Bell,
   ChevronDown,
   HelpCircle,
@@ -11,12 +12,28 @@ import { useModules } from '../hooks/useModules';
 export const Headerbar: React.FC = () => {
   const { fazerLogout, usuario } = useAuth();
   const { activeModuleId, activeSubMenuId, navegarPara } = useApp();
+  const [cadastroFormularioAberto, setCadastroFormularioAberto] = useState(false);
   const { modulos } = useModules();
   const activeModule = modulos.find((module) => module.id === activeModuleId);
   const activeSubmenu = activeModule?.subMenus?.find((submenu) => submenu.id === activeSubMenuId);
   const telaCadastro = activeModuleId === 'cadastro-processo';
   const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'pendencias', 'para-assinatura', 'relatorios', 'alertas', 'administracao'].includes(activeModuleId ?? '');
-  const mostrarBotaoRetorno = telaCadastro;
+  const mostrarBotaoRetorno = telaCadastro && cadastroFormularioAberto;
+
+  useEffect(() => {
+    const atualizarEstadoFormulario = (event: Event) => {
+      setCadastroFormularioAberto((event as CustomEvent<{ aberto: boolean }>).detail.aberto);
+    };
+
+    window.addEventListener('cadastro:formulario-estado', atualizarEstadoFormulario);
+    return () => window.removeEventListener('cadastro:formulario-estado', atualizarEstadoFormulario);
+  }, []);
+
+  useEffect(() => {
+    if (!telaCadastro) {
+      setCadastroFormularioAberto(false);
+    }
+  }, [telaCadastro]);
 
   return (
     <header className="app-header app-header--compact">
@@ -34,9 +51,9 @@ export const Headerbar: React.FC = () => {
               navegarPara('dashboard');
             }}
           >
-            <span aria-hidden="true"></span> Processos
+            <ArrowLeft aria-hidden="true" size={18} strokeWidth={2} /> Voltar para Processos
           </button>
-        ) : mostrarTituloProcessos ? (
+        ) : mostrarTituloProcessos || telaCadastro ? (
           <h1 className="app-header__title">Processos</h1>
         ) : null}
       </div>
