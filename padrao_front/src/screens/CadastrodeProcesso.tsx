@@ -162,7 +162,7 @@ const CadastrodeProcesso: React.FC = () => {
   }, [form.dataEntrada, form.prazoFinal, form.situacaoProcesso, form.responsavel]);
   useEffect(() => {
     void carregarProcessosSalvos();
-  }, []);
+  }, [unidades, carregandoUnidades]);
 
   useEffect(() => {
     if (processoSelecionado) {
@@ -210,8 +210,12 @@ const CadastrodeProcesso: React.FC = () => {
   }, [busca, processosSalvos, form.filtroRespostas]);
 
   const carregarProcessosSalvos = async (): Promise<void> => {
+    if (carregandoUnidades || unidades.length === 0) return;
     try {
-      setProcessosSalvos(await ProcessoService.listar());
+      const processosPorUnidade = await Promise.all(
+        unidades.map((unidade) => ProcessoService.listarPorUnidade(unidade.idUnidade))
+      );
+      setProcessosSalvos(processosPorUnidade.flat());
     } catch (erro) {
       console.error('Erro ao carregar processos:', erro);
     }
@@ -292,7 +296,7 @@ const CadastrodeProcesso: React.FC = () => {
     alert(modoEdicao ? 'Processo atualizado com sucesso!' : 'Processo cadastrado com sucesso!');
 
     definirProcessoSelecionado(null, null);
-    navegarPara('pendencias');
+    navegarPara('cadastro-processo');
   };
 
   const handleCancel = (): void => {
@@ -324,7 +328,7 @@ const CadastrodeProcesso: React.FC = () => {
 
     if (processoSelecionado) {
       definirProcessoSelecionado(null, null);
-      navegarPara('pendencias');
+      navegarPara('cadastro-processo');
     }
   };
 
@@ -413,6 +417,11 @@ const CadastrodeProcesso: React.FC = () => {
       setFiltroProcessos(filtro);
     };
 
+    const abrirDetalhesProcesso = (processo: FormCadastro): void => {
+      definirProcessoSelecionado(processo, 'visualizar');
+      navegarPara('meus-processos');
+    };
+
     return (
       <section className="process-list-page" aria-label="Processos">
         <div className="process-list-page__toolbar"><label><Search size={17} /><input value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Processo SEI ou assunto..." /></label><button className="process-list-page__new" type="button" onClick={() => setMostrarFormulario(true)}><Plus size={17} /> Novo processo</button><button className="process-list-page__filter" type="button"><Filter size={16} /> Filtros avançados</button></div>
@@ -421,7 +430,7 @@ const CadastrodeProcesso: React.FC = () => {
           const dias = getDays(processo);
           const concluido = processo.situacaoProcesso === 'concluido';
           const statusClass = getStatusClass(processo);
-          return <tr key={processo.id || index}><td className="process-list-page__chevron"><ChevronRight size={16} /></td><td className="process-list-page__sei">{processo.processoINCRA || processo.requerimento || 'N/A'}</td><td>{processo.assunto || 'Sem assunto'}</td><td>{processo.orgaoOrigem || '—'}</td><td><span className={`process-list-page__status ${statusClass}`}>{getStatusLabel(processo)}</span></td><td>{processo.prazoFinal ? parseDateLocal(processo.prazoFinal).toLocaleDateString('pt-BR') : '—'}</td><td className={getDaysClass(processo)}>{dias} {typeof dias === 'number' && <i />}</td><td className={`process-list-page__pending ${statusClass}`}>{concluido ? '—' : getPending(processo)}</td><td><button type="button" aria-label="Editar processo" onClick={() => { setForm(processo); definirProcessoSelecionado(processo, 'editar'); setMostrarFormulario(true); }}>›</button></td></tr>;
+          return <tr key={processo.id || index} role="button" tabIndex={0} onClick={() => abrirDetalhesProcesso(processo)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirDetalhesProcesso(processo); } }}><td className="process-list-page__chevron"><ChevronRight size={16} /></td><td className="process-list-page__sei">{processo.processoINCRA || processo.requerimento || 'N/A'}</td><td>{processo.assunto || 'Sem assunto'}</td><td>{processo.orgaoOrigem || '—'}</td><td><span className={`process-list-page__status ${statusClass}`}>{getStatusLabel(processo)}</span></td><td>{processo.prazoFinal ? parseDateLocal(processo.prazoFinal).toLocaleDateString('pt-BR') : '—'}</td><td className={getDaysClass(processo)}>{dias} {typeof dias === 'number' && <i />}</td><td className={`process-list-page__pending ${statusClass}`}>{concluido ? '—' : getPending(processo)}</td><td><button type="button" aria-label="Editar processo" onClick={(event) => { event.stopPropagation(); setForm(processo); definirProcessoSelecionado(processo, 'editar'); setMostrarFormulario(true); }}>›</button></td></tr>;
         })}</tbody></table></div><footer><span className="process-list-page__count">Mostrando 1 a {lista.length} de 127 processos</span><span className="process-list-page__page-size-label">Itens por página:</span><button className="process-list-page__page-size" type="button">10 <ChevronDown size={13} /></button><span className="process-list-page__pagination-divider" /><nav className="process-list-page__pagination" aria-label="Paginação"><button type="button" aria-label="Primeira página">Ⅰ‹</button><button type="button" aria-label="Página anterior">‹</button><b>1</b><button type="button">2</button><button type="button">3</button><span>...</span><button type="button">13</button><button type="button" aria-label="Próxima página">›</button><button type="button" aria-label="Última página">›Ⅰ</button></nav></footer></section>
       </section>
     );

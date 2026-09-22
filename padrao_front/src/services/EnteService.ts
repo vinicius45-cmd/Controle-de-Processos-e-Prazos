@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockEntes } from '../config/mock';
 import { Ente } from '../types';
 
@@ -11,7 +11,8 @@ export const EnteService = {
         (!apenasAtivos || ente.blAtivo === 'S') &&
         (!termo || `${ente.nmEnte} ${ente.sgEnte}`.toLowerCase().includes(termo))
       ));
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const termo = filtro.trim().toLowerCase();
       return localMockEntes.filter((ente) => (
         (!apenasAtivos || ente.blAtivo === 'S') &&
@@ -27,7 +28,8 @@ export const EnteService = {
         blAtivo: 'S'
       });
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const novoEnte: Ente = {
         idEnte: Math.max(...localMockEntes.map((ente) => ente.idEnte), 0) + 1,
         ...dados,
@@ -42,7 +44,8 @@ export const EnteService = {
     try {
       const { data } = await api.put<Ente>(`/dom-entes/${idEnte}`, dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const indice = localMockEntes.findIndex((ente) => ente.idEnte === idEnte);
       if (indice < 0) throw new Error('Ente não encontrado');
       localMockEntes[indice] = { ...localMockEntes[indice], ...dados };
@@ -53,7 +56,8 @@ export const EnteService = {
   async desativar(idEnte: number): Promise<void> {
     try {
       await api.patch(`/dom-entes/${idEnte}/desativar`);
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const ente = localMockEntes.find((item) => item.idEnte === idEnte);
       if (ente) ente.blAtivo = 'N';
     }

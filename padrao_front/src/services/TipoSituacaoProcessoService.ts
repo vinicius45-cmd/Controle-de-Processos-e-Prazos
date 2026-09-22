@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockTiposSituacaoProcesso } from '../config/mock';
 import { TipoSituacaoProcesso } from '../types';
 
@@ -9,7 +9,8 @@ export const TipoSituacaoProcessoService = {
     try {
       const { data } = await api.get<TipoSituacaoProcesso[]>('/dom-tipo-situacao-processo');
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const termo = filtro.trim().toLowerCase();
       return localMockTiposSituacaoProcesso.filter((item) => (
         (!apenasAtivos || item.blAtivo === 'S') &&
@@ -22,7 +23,8 @@ export const TipoSituacaoProcessoService = {
     try {
       const { data } = await api.post<TipoSituacaoProcesso>('/tipos-situacao-processo', { ...dados, blAtivo: 'S' });
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item: TipoSituacaoProcesso = {
         idTipoSituacaoProcesso: Math.max(...localMockTiposSituacaoProcesso.map((value) => value.idTipoSituacaoProcesso), 0) + 1,
         ...dados,
@@ -37,7 +39,8 @@ export const TipoSituacaoProcessoService = {
     try {
       const { data } = await api.put<TipoSituacaoProcesso>(`/tipos-situacao-processo/${id}`, dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const index = localMockTiposSituacaoProcesso.findIndex((item) => item.idTipoSituacaoProcesso === id);
       if (index < 0) throw new Error('Situação de processo não encontrada');
       localMockTiposSituacaoProcesso[index] = { ...localMockTiposSituacaoProcesso[index], ...dados };
@@ -48,7 +51,8 @@ export const TipoSituacaoProcessoService = {
   async desativar(id: number): Promise<void> {
     try {
       await api.patch(`/tipos-situacao-processo/${id}/desativar`);
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item = localMockTiposSituacaoProcesso.find((value) => value.idTipoSituacaoProcesso === id);
       if (item) item.blAtivo = 'N';
     }

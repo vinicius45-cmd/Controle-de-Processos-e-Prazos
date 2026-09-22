@@ -128,6 +128,7 @@ const Administracao: React.FC = () => {
   const [enteFormAberto, setEnteFormAberto] = useState(false);
   const [enteEditando, setEnteEditando] = useState<Ente | null>(null);
   const [enteForm, setEnteForm] = useState<FormEnte>({ nmEnte: '', sgEnte: '' });
+  const [erroCatalogos, setErroCatalogos] = useState<string | null>(null);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [unidadesLoading, setUnidadesLoading] = useState(false);
   const [unidadeFiltro, setUnidadeFiltro] = useState('');
@@ -146,6 +147,8 @@ const Administracao: React.FC = () => {
     setEntesLoading(true);
     try {
       setEntes(await EnteService.listar(filtro, false));
+    } catch (error) {
+      setErroCatalogos(error instanceof Error ? error.message : 'Não foi possível carregar os entes.');
     } finally {
       setEntesLoading(false);
     }
@@ -155,6 +158,8 @@ const Administracao: React.FC = () => {
     setUnidadesLoading(true);
     try {
       setUnidades(await UnidadeService.listar(filtro, false));
+    } catch (error) {
+      setErroCatalogos(error instanceof Error ? error.message : 'Não foi possível carregar as unidades.');
     } finally {
       setUnidadesLoading(false);
     }
@@ -167,12 +172,16 @@ const Administracao: React.FC = () => {
   }, []);
 
   const carregarTipos = async (): Promise<void> => {
-    const [assuntos, documentos] = await Promise.all([
-      TipoAssuntoService.listar(undefined, tipoFiltro, false),
-      TipoDocumentoService.listar(tipoFiltro, false)
-    ]);
-    setTiposAssunto(assuntos);
-    setTiposDocumento(documentos);
+    try {
+      const [assuntos, documentos] = await Promise.all([
+        TipoAssuntoService.listar(undefined, tipoFiltro, false),
+        TipoDocumentoService.listar(tipoFiltro, false)
+      ]);
+      setTiposAssunto(assuntos);
+      setTiposDocumento(documentos);
+    } catch (error) {
+      setErroCatalogos(error instanceof Error ? error.message : 'Não foi possível carregar os catálogos.');
+    }
   };
 
   const handleToggle = (field: keyof ConfiguracaoSistema): void => {
@@ -436,6 +445,11 @@ const Administracao: React.FC = () => {
           </button>
         )}
       </div>
+      {erroCatalogos && (
+        <div className="administracao-save-message" role="alert">
+          {erroCatalogos}. Verifique a API, a autenticação ou ative `VITE_USE_MOCK_API=true` para desenvolvimento offline.
+        </div>
+      )}
 
       <div className="administracao-tabs" role="tablist" aria-label="Sub-abas de administração">
         <button

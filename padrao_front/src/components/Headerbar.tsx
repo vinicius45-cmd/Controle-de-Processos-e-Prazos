@@ -13,7 +13,7 @@ export const Headerbar: React.FC = () => {
   const { activeModuleId, navegarPara } = useApp();
   const [cadastroFormularioAberto, setCadastroFormularioAberto] = useState(false);
   const telaCadastro = activeModuleId === 'cadastro-processo';
-  const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'pendencias', 'para-assinatura', 'relatorios', 'alertas', 'administracao'].includes(activeModuleId ?? '');
+  const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'administracao'].includes(activeModuleId ?? '');
   const mostrarBotaoRetorno = telaCadastro && cadastroFormularioAberto;
 
   useEffect(() => {
@@ -56,9 +56,9 @@ export const Headerbar: React.FC = () => {
 
       <div className="app-header__actions">
         <button
-          aria-label="Ir para alertas"
+          aria-label="Ir para o painel"
           className="app-header__icon-button"
-          onClick={() => navegarPara('alertas')}
+          onClick={() => navegarPara('dashboard')}
           type="button"
         >
           <span className="app-header__notification-icon"><Bell size={19} /><b>3</b></span>

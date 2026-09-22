@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { FormCadastro, Processo } from '../types';
 
 const STORAGE_KEY = 'processos_cadastrados';
@@ -8,7 +8,8 @@ const lerLocalmente = (): Processo[] => {
   if (!conteudo) return [];
   try {
     return JSON.parse(conteudo) as Processo[];
-  } catch {
+  } catch (error) {
+    if (!isMockApi) throw error;
     return [];
   }
 };
@@ -18,12 +19,16 @@ const salvarLocalmente = (processos: Processo[]): void => {
 };
 
 export const ProcessoService = {
-  async listar(): Promise<Processo[]> {
+  async listarPorUnidade(idUnidade: number, termo = ''): Promise<Processo[]> {
     try {
-      const { data } = await api.get<Processo[]>('/processos');
+      const { data } = await api.get<Processo[]>(`/processos/unidade/${idUnidade}`, { params: termo ? { termo } : undefined });
       return data;
-    } catch {
-      return lerLocalmente();
+    } catch (error) {
+      if (!isMockApi) throw error;
+      return lerLocalmente().filter((processo) => (
+        processo.idUnidade === idUnidade &&
+        (!termo || `${processo.processoINCRA} ${processo.assunto}`.toLowerCase().includes(termo.toLowerCase()))
+      ));
     }
   },
 
@@ -50,7 +55,8 @@ export const ProcessoService = {
         ? await api.patch<Processo>(`/processos/${processo.id}`, payload)
         : await api.post<Processo>('/processos', payload);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const idProcesso = processo.id || Date.now().toString();
       const processoLocal: Processo = { ...processo, id: String(idProcesso), idProcesso };
       const processos = lerLocalmente().filter((item) => String(item.id) !== String(idProcesso));

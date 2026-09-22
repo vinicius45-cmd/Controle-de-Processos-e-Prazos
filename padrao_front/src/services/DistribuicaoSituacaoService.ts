@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockDistribuicoesSituacoes } from '../config/mock';
 import { DistribuicaoSituacao } from '../types';
 
@@ -9,7 +9,8 @@ export const DistribuicaoSituacaoService = {
     try {
       const { data } = await api.get<DistribuicaoSituacao[]>(`/distribuicoes-situacoes/distribuicao/${idDistribuicao}`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockDistribuicoesSituacoes.filter((item) => item.idDistribuicao === idDistribuicao);
     }
   },
@@ -18,7 +19,8 @@ export const DistribuicaoSituacaoService = {
     try {
       const { data } = await api.post<DistribuicaoSituacao>('/distribuicoes-situacoes', dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const anterior = localMockDistribuicoesSituacoes.find((item) => item.idDistribuicao === dados.idDistribuicao && !item.dtFim);
       if (anterior) anterior.dtFim = dados.dtInicio;
       const item: DistribuicaoSituacao = {

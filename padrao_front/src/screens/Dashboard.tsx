@@ -25,6 +25,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { FormCadastro } from '../types';
+import { useApp } from '../app/AppProvider';
 
 type Criticidade =
   | 'Atrasado'
@@ -329,6 +330,7 @@ const converterParaProcesso = (form: FormCadastro, index: number): Processo => {
 };
 
 export const Dashboard: React.FC = () => {
+  const { definirProcessoSelecionado, navegarPara } = useApp();
   const [processosExibicao, setProcessosExibicao] = useState<Processo[]>([]);
   const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null);
   const [processosComBlur, setProcessosComBlur] = useState<Record<number, boolean>>({});
@@ -359,6 +361,30 @@ export const Dashboard: React.FC = () => {
   const handleSelecionarCard = (titulo: string) => {
     setFiltroAtivo((filtroAtual) => (filtroAtual === titulo ? null : titulo));
     setMostrarTodosProcessos(true);
+  };
+
+  const abrirDetalhesProcesso = (processo: Processo): void => {
+    const processoSelecionado: FormCadastro = {
+      processoINCRA: processo.numeroSei,
+      requerimento: '',
+      assunto: processo.assunto,
+      assuntoTipo: 'Ofício',
+      destinatario: '',
+      solicitudesInformacao: [],
+      orgaoOrigem: processo.orgao,
+      dataEntrada: '',
+      prazoAreaTecnica: '',
+      prazoFinal: processo.prazoFinal,
+      situacaoProcesso: processo.situacao === 'Para assinatura' ? 'em-andamento' : 'em-andamento',
+      responsavel: processo.responsavel,
+      documentoSEI: '',
+      especial: processo.criticidade === 'Especial',
+      filtroRespostas: processo.criticidade === 'Para Assinatura',
+      observacao: ''
+    };
+
+    definirProcessoSelecionado(processoSelecionado, 'visualizar');
+    navegarPara('meus-processos');
   };
 
   const alternarBlurProcesso = (id: number) => {
@@ -646,7 +672,18 @@ export const Dashboard: React.FC = () => {
             </thead>
             <tbody>
               {processosVisiveis.map((processo) => (
-                <tr key={processo.id}>
+                <tr
+                  key={processo.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => abrirDetalhesProcesso(processo)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      abrirDetalhesProcesso(processo);
+                    }
+                  }}
+                >
                   <td className={processosComBlur[processo.id] ? 'dashboard-cell--blurred' : ''}>
                     <span className={`dashboard-badge dashboard-badge--${getCriticidadeVariant(processo.criticidade)}`}>
                       {processo.criticidade}
@@ -672,7 +709,10 @@ export const Dashboard: React.FC = () => {
                       <button
                         aria-label={`Visualizar processo ${processo.numeroSei}`}
                         type="button"
-                        onClick={() => alternarBlurProcesso(processo.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          alternarBlurProcesso(processo.id);
+                        }}
                       >
                         {processosComBlur[processo.id] ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>

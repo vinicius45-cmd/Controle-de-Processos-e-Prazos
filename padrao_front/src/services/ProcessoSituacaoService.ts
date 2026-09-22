@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockProcessosSituacoes } from '../config/mock';
 import { ProcessoSituacao } from '../types';
 
@@ -9,7 +9,8 @@ export const ProcessoSituacaoService = {
     try {
       const { data } = await api.get<ProcessoSituacao[]>(`/processos-situacoes/processo/${idProcesso}`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockProcessosSituacoes.filter((item) => String(item.idProcesso) === String(idProcesso));
     }
   },
@@ -18,7 +19,8 @@ export const ProcessoSituacaoService = {
     try {
       const { data } = await api.post<ProcessoSituacao>('/processos-situacoes', dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const anterior = localMockProcessosSituacoes.find((item) => String(item.idProcesso) === String(dados.idProcesso) && !item.dtFim);
       if (anterior) anterior.dtFim = dados.dtInicio;
       const item: ProcessoSituacao = {

@@ -5,6 +5,11 @@ import { ModulesProvider } from '../hooks/useModules';
 import { AppContextType, FormCadastro } from '../types';
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+const MODULOS_LEGADOS = new Set(['pendencias', 'para-assinatura', 'relatorios', 'alertas']);
+
+const normalizarModulo = (moduleId?: string): string => (
+  moduleId && !MODULOS_LEGADOS.has(moduleId) ? moduleId : 'cadastro-processo'
+);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -52,7 +57,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state as { moduleId?: string; subMenuId?: string | null } | null;
       if (state?.moduleId) {
-        setActiveModuleId(state.moduleId);
+        setActiveModuleId(normalizarModulo(state.moduleId));
         setActiveSubMenuId(state.subMenuId ?? null);
       }
     };
@@ -60,7 +65,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (typeof window !== 'undefined') {
       const initialState = window.history.state as { moduleId?: string; subMenuId?: string | null } | null;
       if (initialState?.moduleId) {
-        setActiveModuleId(initialState.moduleId);
+        setActiveModuleId(normalizarModulo(initialState.moduleId));
         setActiveSubMenuId(initialState.subMenuId ?? null);
       } else {
         window.history.replaceState({ moduleId: activeModuleId, subMenuId: activeSubMenuId }, '', window.location.pathname);

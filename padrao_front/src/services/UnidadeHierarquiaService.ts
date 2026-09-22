@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockUnidadesHierarquia } from '../config/mock';
 import { UnidadeHierarquia } from '../types';
 
@@ -22,7 +22,8 @@ export const UnidadeHierarquiaService = {
     try {
       const respostas = await Promise.all(idUnidades.map((idUnidade) => this.vigentesDaUnidade(idUnidade)));
       return respostas.flat();
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S' && idUnidades.includes(item.idUnidade));
     }
   },
@@ -31,7 +32,8 @@ export const UnidadeHierarquiaService = {
     try {
       const { data } = await api.get<UnidadeHierarquia[]>(`/unidades-hierarquias/unidade/${idUnidade}`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockUnidadesHierarquia.filter((item) => item.idUnidade === idUnidade);
     }
   },
@@ -40,7 +42,8 @@ export const UnidadeHierarquiaService = {
     try {
       const { data } = await api.get<UnidadeHierarquia[]>(`/unidades-hierarquias/unidade/${idUnidade}/vigentes`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockUnidadesHierarquia.filter((item) => item.idUnidade === idUnidade && item.blVigente === 'S');
     }
   },
@@ -49,7 +52,8 @@ export const UnidadeHierarquiaService = {
     try {
       const { data } = await api.get<UnidadeHierarquia[]>(`/unidades-hierarquias/superior/${idUnidadeSuperior}/subordinadas`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockUnidadesHierarquia.filter((item) => item.idUnidadeSuperior === idUnidadeSuperior && item.blVigente === 'S');
     }
   },
@@ -60,7 +64,8 @@ export const UnidadeHierarquiaService = {
     try {
       const { data } = await api.post<UnidadeHierarquia>('/unidades-hierarquias', { ...dados, blVigente: 'S' });
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item: UnidadeHierarquia = {
         idUnidadeHierarquia: Math.max(...localMockUnidadesHierarquia.map((value) => value.idUnidadeHierarquia), 0) + 1,
         ...dados,
@@ -75,7 +80,8 @@ export const UnidadeHierarquiaService = {
   async encerrar(idUnidadeHierarquia: number, dtFimVigencia: string): Promise<void> {
     try {
       await api.patch(`/unidades-hierarquias/${idUnidadeHierarquia}/encerrar`, { dtFimVigencia });
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item = localMockUnidadesHierarquia.find((value) => value.idUnidadeHierarquia === idUnidadeHierarquia);
       if (item) {
         item.dtFimVigencia = dtFimVigencia;

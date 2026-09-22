@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Evita CORS no desenvolvimento ao encaminhar o CDP pelo servidor Vite
+      '/cdp': {
+        target: 'https://dev-sismob.semob.df.gov.br',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cdp/, '')
+      },
       // Redireciona chamadas locais para o backend homologado da SEMOB
       '/api-semob': {
         target: 'https://homologacao.semob.df.gov.br',

@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockTiposSituacaoDistribuicao } from '../config/mock';
 import { TipoSituacaoDistribuicao } from '../types';
 
@@ -9,7 +9,8 @@ export const TipoSituacaoDistribuicaoService = {
     try {
       const { data } = await api.get<TipoSituacaoDistribuicao[]>('/dom-tipo-situacao-distribuicao');
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const termo = filtro.trim().toLowerCase();
       return localMockTiposSituacaoDistribuicao.filter((item) => (
         (!apenasAtivos || item.blAtivo === 'S') &&
@@ -22,7 +23,8 @@ export const TipoSituacaoDistribuicaoService = {
     try {
       const { data } = await api.post<TipoSituacaoDistribuicao>('/tipos-situacao-distribuicao', { ...dados, blAtivo: 'S' });
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item: TipoSituacaoDistribuicao = {
         idTipoSituacaoDistribuicao: Math.max(...localMockTiposSituacaoDistribuicao.map((value) => value.idTipoSituacaoDistribuicao), 0) + 1,
         ...dados,
@@ -37,7 +39,8 @@ export const TipoSituacaoDistribuicaoService = {
     try {
       const { data } = await api.put<TipoSituacaoDistribuicao>(`/tipos-situacao-distribuicao/${id}`, dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const index = localMockTiposSituacaoDistribuicao.findIndex((item) => item.idTipoSituacaoDistribuicao === id);
       if (index < 0) throw new Error('Situação de distribuição não encontrada');
       localMockTiposSituacaoDistribuicao[index] = { ...localMockTiposSituacaoDistribuicao[index], ...dados };
@@ -48,7 +51,8 @@ export const TipoSituacaoDistribuicaoService = {
   async desativar(id: number): Promise<void> {
     try {
       await api.patch(`/tipos-situacao-distribuicao/${id}/desativar`);
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item = localMockTiposSituacaoDistribuicao.find((value) => value.idTipoSituacaoDistribuicao === id);
       if (item) item.blAtivo = 'N';
     }

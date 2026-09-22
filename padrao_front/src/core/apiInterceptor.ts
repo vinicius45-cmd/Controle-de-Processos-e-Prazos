@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, cdpApi } from '../config/api';
 
 /**
  * Registra cabeçalhos e configurações dinâmicas de segurança
@@ -9,7 +9,9 @@ export const setupApiInterceptors = (
   userIdProvider: () => string | null
 ) => {
   // Request Interceptor
-  api.interceptors.request.use(
+  const clients = [api, cdpApi];
+
+  clients.forEach((client) => client.interceptors.request.use(
     (config) => {
       const token = tokenProvider();
       const userId = userIdProvider();
@@ -29,10 +31,10 @@ export const setupApiInterceptors = (
     (error) => {
       return Promise.reject(error);
     }
-  );
+  ));
 
   // Response Interceptor
-  api.interceptors.response.use(
+  clients.forEach((client) => client.interceptors.response.use(
     (response) => {
       // Se a resposta for HTML (comum em servidores SPA de dev quando o endpoint não existe)
       const contentType = response.headers?.['content-type'];
@@ -52,13 +54,13 @@ export const setupApiInterceptors = (
         window.dispatchEvent(new CustomEvent('auth:expired'));
       }
       
-      const apiError = error.response?.data?.message || 
-                       error.response?.data?.erro || 
-                       "Erro interno na comunicação com a SEMOB";
+      const apiError = error.response?.data?.message ||
+               error.response?.data?.erro ||
+               (status ? `Falha na API (HTTP ${status})` : 'Não foi possível conectar à API');
       
-      console.error('[API Error]:', apiError);
+      console.error(`[API Error]${status ? ` HTTP ${status}` : ''}:`, apiError);
       return Promise.reject(new Error(apiError));
     }
-  );
+  ));
 };
 export default setupApiInterceptors;

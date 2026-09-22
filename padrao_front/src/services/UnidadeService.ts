@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockUnidades } from '../config/mock';
 import { Unidade } from '../types';
 
@@ -9,7 +9,8 @@ export const UnidadeService = {
     try {
       const { data } = await api.get<Unidade[]>(apenasAtivas ? '/unidades/ativas' : '/unidades');
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const termo = filtro.trim().toLowerCase();
       return localMockUnidades.filter((unidade) => (
         (!apenasAtivas || unidade.blAtivo === 'S') &&
@@ -22,7 +23,8 @@ export const UnidadeService = {
     try {
       const { data } = await api.post<Unidade>('/unidades', { ...dados, blAtivo: 'S' });
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const novaUnidade: Unidade = {
         idUnidade: Math.max(...localMockUnidades.map((item) => item.idUnidade), 0) + 1,
         ...dados,
@@ -37,7 +39,8 @@ export const UnidadeService = {
     try {
       const { data } = await api.patch<Unidade>(`/unidades/${idUnidade}`, dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const indice = localMockUnidades.findIndex((item) => item.idUnidade === idUnidade);
       if (indice < 0) throw new Error('Unidade não encontrada');
       localMockUnidades[indice] = { ...localMockUnidades[indice], ...dados };
@@ -48,7 +51,8 @@ export const UnidadeService = {
   async desativar(idUnidade: number): Promise<void> {
     try {
       await api.patch(`/unidades/${idUnidade}/desativar`);
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const unidade = localMockUnidades.find((item) => item.idUnidade === idUnidade);
       if (unidade) unidade.blAtivo = 'N';
     }

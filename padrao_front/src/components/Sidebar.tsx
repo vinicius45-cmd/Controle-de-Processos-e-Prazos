@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
-  Bell,
   ClipboardList,
-  FileCheck2,
   FilePenLine,
-  FileText,
   Home,
   LucideIcon,
   LogOut,
@@ -34,10 +31,6 @@ export const processSidebarItems: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
   { id: 'meus-processos', label: 'Meus Processos', icon: ClipboardList, path: '/meus-processos' },
   { id: 'cadastro-processo', label: 'Cadastro de Processo', icon: FilePenLine, path: '/cadastro-processo' },
-  { id: 'pendencias', label: 'Pendências', icon: FileText, path: '/pendencias' },
-  { id: 'para-assinatura', label: 'Para Assinatura', icon: FileCheck2, path: '/para-assinatura' },
-  { id: 'relatorios', label: 'Relatórios', icon: ClipboardList, path: '/relatorios' },
-  { id: 'alertas', label: 'Alertas', icon: Bell, path: '/alertas' },
   { id: 'administracao', label: 'Administração', icon: Settings, path: '/administracao' }
 ];
 

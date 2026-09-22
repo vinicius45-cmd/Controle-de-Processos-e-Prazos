@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { localMockProcessosDistribuicoes } from '../config/mock';
 import { ProcessoDistribuicao } from '../types';
 
@@ -9,7 +9,8 @@ export const ProcessoDistribuicaoService = {
     try {
       const { data } = await api.get<ProcessoDistribuicao[]>(`/processos-distribuicoes/processo/${idProcesso}`);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       return localMockProcessosDistribuicoes.filter((item) => String(item.idProcesso) === String(idProcesso));
     }
   },
@@ -18,7 +19,8 @@ export const ProcessoDistribuicaoService = {
     try {
       const { data } = await api.post<ProcessoDistribuicao>('/processos-distribuicoes', dados);
       return data;
-    } catch {
+    } catch (error) {
+      if (!isMockApi) throw error;
       const item: ProcessoDistribuicao = {
         idDistribuicao: Math.max(...localMockProcessosDistribuicoes.map((value) => value.idDistribuicao), 0) + 1,
         ...dados,

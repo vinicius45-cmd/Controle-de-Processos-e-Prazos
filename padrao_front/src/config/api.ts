@@ -1,28 +1,28 @@
 import axios from 'axios';
 
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  timeout: 10000,
-});
+export const isMockApi = import.meta.env.VITE_USE_MOCK_API === 'true';
+const cdpBaseURL = import.meta.env.DEV
+  ? '/cdp'
+  : (import.meta.env.VITE_CDP_API_URL || 'https://dev-sismob.semob.df.gov.br');
 
-const useMockApi = import.meta.env.VITE_USE_MOCK_API === 'true';
+const criarCliente = (baseURL: string) => {
+  const client = axios.create({ baseURL, timeout: 10000 });
 
-api.interceptors.request.use((config) => {
-  if (useMockApi) {
-    throw new Error('API mock habilitada');
-  }
-  return config;
-});
+  client.interceptors.request.use((config) => {
+    if (isMockApi) {
+      throw new Error('API mock habilitada');
+    }
+    return config;
+  });
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Intercepta e formata com base no padrão SISMOB Backend
-    const apiError = error.response?.data?.message || "Erro interno na comunicação com a SEMOB";
-    
-    // Disparar um Toast/Alerta padronizado
-    console.error('[API Error]:', apiError);
-    
-    return Promise.reject(new Error(apiError));
-  }
-);
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => Promise.reject(error)
+  );
+
+  return client;
+};
+
+export const api = criarCliente(import.meta.env.VITE_API_URL);
+export const cdpApi = criarCliente(cdpBaseURL);
+
