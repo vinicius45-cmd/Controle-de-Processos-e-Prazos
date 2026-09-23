@@ -1050,23 +1050,33 @@ body {
 
 .management-metric__icon {
   align-items: center;
-  background: #e1f0ff;
-  border-radius: 50%;
-  color: #1765c4;
-  display: flex;
-  flex: 0 0 42px;
-  height: 42px;
-  justify-content: center;
-  width: 42px;
+  background: #edf4ff !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  color: #2357b6 !important;
+  display: flex !important;
+  flex: 0 0 42px !important;
+  filter: none !important;
+  height: 42px !important;
+  justify-content: center !important;
+  width: 42px !important;
 }
 
-.management-metric--blue .management-metric__icon { background: #2d74d6; color: #ffffff; }
-.management-metric--red .management-metric__icon { background: #e52d32; color: #ffffff; }
-.management-metric--orange .management-metric__icon { background: #ff5c00; color: #ffffff; }
-.management-metric--yellow .management-metric__icon { background: #ffb300; color: #ffffff; }
-.management-metric--green .management-metric__icon { background: #2d9053; color: #ffffff; }
-.management-metric--purple .management-metric__icon { background: #8a5bd6; color: #ffffff; }
-.management-metric--sky .management-metric__icon { background: #111111; color: #ffffff; }
+.management-metric__icon svg {
+  color: currentColor !important;
+  fill: none !important;
+  filter: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.2 !important;
+}
+
+.management-metric--blue .management-metric__icon { background: #edf4ff !important; color: #2357b6 !important; }
+.management-metric--red .management-metric__icon { background: #fff0f0 !important; color: #dd3b3b !important; }
+.management-metric--orange .management-metric__icon { background: #fff4ea !important; color: #f08820 !important; }
+.management-metric--yellow .management-metric__icon { background: #fff8dd !important; color: #c78a00 !important; }
+.management-metric--green .management-metric__icon { background: #edfdf5 !important; color: #2f8b4d !important; }
+.management-metric--purple .management-metric__icon { background: #f5f0ff !important; color: #7a5ed6 !important; }
+.management-metric--sky .management-metric__icon { background: #eef4ff !important; color: #2357b6 !important; }
 
 .management-metric__copy {
   display: flex;

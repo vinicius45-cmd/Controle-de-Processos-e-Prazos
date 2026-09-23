@@ -9,6 +9,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const STORAGE_USER_KEY = 'sim_usuario_data';
 const STORAGE_TOKEN_KEY = 'sim_auth_token';
 
+// TODO: remover este bypass quando a integra\u00e7\u00e3o com o CDP estiver dispon\u00edvel.
+// Enquanto isso, qualquer preenchimento v\u00e1lido na tela de login cria uma sess\u00e3o local
+// com acesso completo ao sistema, sem consultar usu\u00e1rios ou permiss\u00f5es no CDP.
+const CDP_VALIDATION_DISABLED = true;
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(() => {
     const userSalvo = localStorage.getItem(STORAGE_USER_KEY);
@@ -57,6 +62,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoadingAuth(true);
 
     try {
+      if (CDP_VALIDATION_DISABLED) {
+        const nickname = usuarioInput.trim().split('@')[0] || 'usuario';
+        const localToken = `local-session-${Date.now()}`;
+        const loggedUser: Usuario = {
+          // "admin" tamb\u00e9m mant\u00e9m compatibilidade com as verifica\u00e7\u00f5es de acesso existentes.
+          id: 'admin',
+          idUsuario: 0,
+          nome: nickname,
+          email: usuarioInput.includes('@') ? usuarioInput.trim() : `${nickname}@local`,
+          matricula: 'N/A',
+          cargo: 'Acesso tempor\u00e1rio',
+          departamento: 'SEMOB',
+          rotasPermitidas: ['*'],
+          permissoesServicos: {}
+        };
+
+        tokenStore.setToken(localToken);
+        tokenStore.setUserId('0');
+        localStorage.setItem(STORAGE_TOKEN_KEY, localToken);
+        localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(loggedUser));
+        setUsuario(loggedUser);
+        return;
+      }
+
       // 1. LDAP Authentication call
       const authData = await cdpService.login(usuarioInput, senhaInput);
       
@@ -185,6 +214,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Real-time permission polling (every 15 seconds)
   useEffect(() => {
+    if (CDP_VALIDATION_DISABLED) return;
     if (!usuario || !usuario.idUsuario) return;
 
     const interval = setInterval(async () => {

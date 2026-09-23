@@ -530,12 +530,37 @@ export const Dashboard: React.FC = () => {
       <section className="management-table-card">
         <header><h2>Processos que exigem atenção</h2></header>
         <div className="management-table-wrap"><table className="management-table"><thead><tr><th>Prioridade</th><th>Processo SEI</th><th>Assunto</th><th>Ente</th><th>Situação</th><th>Prazo</th><th>Dias <Info size={12} /></th><th>Pendências</th><th aria-label="Abrir" /></tr></thead><tbody>
-          {processosVisiveis.map((processo) => <tr key={processo.id}>
-            <td><span className={`management-priority management-priority--${getCriticidadeVariant(processo.criticidade)}`} /></td>
-            <td className="management-table__sei">{processo.numeroSei}</td><td>{processo.assunto}</td><td>{processo.orgao.replace('Secretaria de ', '')}</td>
-            <td><span className={`management-status management-status--${getCriticidadeVariant(processo.criticidade)}`}>{processo.criticidade === 'Atrasado' ? 'Aguardando retorno' : processo.situacao}</span></td>
-            <td>{processo.prazoFinal}</td><td className={getDiasRestantesClass(processo.diasRestantes)}>{processo.diasRestantes.replace(' dias', '').replace(' dia', '')}</td><td className="management-table__pending">{processo.criticidade === 'OK' ? '—' : processo.orgao.split(' ')[0].toUpperCase()}</td><td className="management-table__open">›</td>
-          </tr>)}
+          {processosVisiveis.map((processo) => (
+            <tr
+              key={processo.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => abrirDetalhesProcesso(processo)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  abrirDetalhesProcesso(processo);
+                }
+              }}
+            >
+              <td><span className={`management-priority management-priority--${getCriticidadeVariant(processo.criticidade)}`} /></td>
+              <td className="management-table__sei">{processo.numeroSei}</td><td>{processo.assunto}</td><td>{processo.orgao.replace('Secretaria de ', '')}</td>
+              <td><span className={`management-status management-status--${getCriticidadeVariant(processo.criticidade)}`}>{processo.criticidade === 'Atrasado' ? 'Aguardando retorno' : processo.situacao}</span></td>
+              <td>{processo.prazoFinal}</td><td className={getDiasRestantesClass(processo.diasRestantes)}>{processo.diasRestantes.replace(' dias', '').replace(' dia', '')}</td><td className="management-table__pending">{processo.criticidade === 'OK' ? '—' : processo.orgao.split(' ')[0].toUpperCase()}</td>
+              <td className="management-table__open">
+                <button
+                  type="button"
+                  aria-label={`Visualizar processo ${processo.numeroSei}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    abrirDetalhesProcesso(processo);
+                  }}
+                >
+                  ›
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody></table></div>
         <footer className="management-table__footer"><span>Mostrando 1 a {processosVisiveis.length} de 127 processos</span><button type="button">10 por página <ChevronDown size={13} /></button><span>‹</span><b>1</b><span>2</span><span>3</span><span>...</span><span>13</span><span>›</span></footer>
       </section>
