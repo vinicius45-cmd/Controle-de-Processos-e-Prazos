@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Clock3,
   HelpCircle,
   ClipboardList,
@@ -556,7 +557,7 @@ export const Dashboard: React.FC = () => {
                     abrirDetalhesProcesso(processo);
                   }}
                 >
-                  ›
+                  <ChevronRight size={16} />
                 </button>
               </td>
             </tr>

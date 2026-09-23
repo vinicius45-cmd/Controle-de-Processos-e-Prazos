@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, CalendarDays, ChevronDown, Info, MoreVertical, PencilLine, Repeat2, Save } from 'lucide-react';
 import { useApp } from '../app/AppProvider';
 import { FormCadastro } from '../types';
+import useTiposSituacaoProcesso from '../hooks/useTiposSituacaoProcesso';
+import { localMockTiposSituacaoProcesso } from '../config/mock';
 import HistoricoProcesso from '../components/processos/HistoricoProcesso';
 import '../styles/DetalhesProcesso.css';
 
@@ -146,8 +148,44 @@ const construirProcessoDetalhe = (processo: FormCadastro | null): ProcessoDetalh
 
 const DetalhesProcesso: React.FC = () => {
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>('dados');
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [alterandoSituacao, setAlterandoSituacao] = useState(false);
+  const [modalSituacaoAberto, setModalSituacaoAberto] = useState(false);
+  const [situacaoAtual, setSituacaoAtual] = useState('');
+  const [situacaoSelecionada, setSituacaoSelecionada] = useState('');
   const { processoSelecionado, definirProcessoSelecionado, navegarPara } = useApp();
+  const { tiposSituacaoProcesso } = useTiposSituacaoProcesso();
   const processo = useMemo(() => construirProcessoDetalhe(processoSelecionado), [processoSelecionado]);
+  const situacoesDisponiveis = tiposSituacaoProcesso.length > 0 ? tiposSituacaoProcesso : localMockTiposSituacaoProcesso;
+
+  useEffect(() => {
+    setSituacaoAtual(processo.statusLabel);
+  }, [processo.numeroSei, processo.statusLabel]);
+
+  const abrirModalSituacao = (): void => {
+    setSituacaoSelecionada(situacaoAtual);
+    setModalSituacaoAberto(true);
+    setAlterandoSituacao(true);
+  };
+
+  const fecharModalSituacao = (): void => {
+    setModalSituacaoAberto(false);
+    setAlterandoSituacao(false);
+  };
+
+  const confirmarSituacao = (): void => {
+    if (!situacaoSelecionada) return;
+
+    setSituacaoAtual(situacaoSelecionada);
+    setModalSituacaoAberto(false);
+    setAlterandoSituacao(false);
+  };
+
+  const atualizarCampo = (campo: keyof FormCadastro, valor: string | boolean): void => {
+    if (!processoSelecionado) return;
+
+    definirProcessoSelecionado({ ...processoSelecionado, [campo]: valor }, 'visualizar');
+  };
 
   const voltarParaProcessos = (): void => {
     definirProcessoSelecionado(null, null);
@@ -157,6 +195,20 @@ const DetalhesProcesso: React.FC = () => {
   const renderConteudo = (): React.ReactNode => {
     if (abaAtiva === 'dados') {
       const valorCampo = (label: string): string => processo.dados.find((campo) => campo.label === label)?.value ?? 'Não informado';
+      const controleSelecao = (label: string, campo: keyof FormCadastro): React.ReactNode => (
+        modoEdicao ? (
+          <input
+            className="detalhes-processo__control"
+            value={valorCampo(label)}
+            onChange={(event) => atualizarCampo(campo, event.target.value)}
+          />
+        ) : (
+          <div className="detalhes-processo__control detalhes-processo__control--select" aria-readonly="true">
+            {valorCampo(label)}
+            <ChevronDown size={14} />
+          </div>
+        )
+      );
 
       return (
         <div className="detalhes-processo__content-grid">
@@ -169,15 +221,15 @@ const DetalhesProcesso: React.FC = () => {
                 <div className="detalhes-processo__field-grid">
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Ente <span>*</span></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--select">{valorCampo('Ente')}<ChevronDown size={14} /></div>
+                    {controleSelecao('Ente', 'orgaoOrigem')}
                   </div>
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Tipo de documento <span>*</span></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--select">{valorCampo('Tipo de documento')}<ChevronDown size={14} /></div>
+                    {controleSelecao('Tipo de documento', 'assuntoTipo')}
                   </div>
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Nº do documento <span>*</span></label>
-                    <input className="detalhes-processo__control" value={valorCampo('N° do documento')} readOnly />
+                    <input className="detalhes-processo__control" value={valorCampo('N° do documento')} readOnly={!modoEdicao} onChange={(event) => atualizarCampo('documentoSEI', event.target.value)} />
                   </div>
                 </div>
               </section>
@@ -187,15 +239,15 @@ const DetalhesProcesso: React.FC = () => {
                 <div className="detalhes-processo__field-grid">
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Tipo de assunto <span>*</span></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--select">{valorCampo('Tipo de assunto')}<ChevronDown size={14} /></div>
+                    {controleSelecao('Tipo de assunto', 'assuntoTipo')}
                   </div>
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Assunto <span>*</span></label>
-                    <textarea className="detalhes-processo__control detalhes-processo__control--textarea" value={valorCampo('Assunto')} readOnly />
+                    <textarea className="detalhes-processo__control detalhes-processo__control--textarea" value={valorCampo('Assunto')} readOnly={!modoEdicao} onChange={(event) => atualizarCampo('assunto', event.target.value)} />
                   </div>
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Processo especial <Info size={13} /></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--select">{valorCampo('Processo especial')}<ChevronDown size={14} /></div>
+                    {controleSelecao('Processo especial', 'assuntoTipo')}
                   </div>
                 </div>
               </section>
@@ -205,18 +257,18 @@ const DetalhesProcesso: React.FC = () => {
                 <div className="detalhes-processo__field-grid">
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Data de entrada <span>*</span></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--date">{valorCampo('Data de entrada')}<CalendarDays size={15} /></div>
+                    {modoEdicao ? <input className="detalhes-processo__control" value={valorCampo('Data de entrada')} onChange={(event) => atualizarCampo('dataEntrada', event.target.value)} /> : <div className="detalhes-processo__control detalhes-processo__control--date">{valorCampo('Data de entrada')}<CalendarDays size={15} /></div>}
                   </div>
                   <div className="detalhes-processo__field">
                     <label className="detalhes-processo__label">Prazo final <span>*</span></label>
-                    <div className="detalhes-processo__control detalhes-processo__control--date">{valorCampo('Prazo final')}<CalendarDays size={15} /></div>
+                    {modoEdicao ? <input className="detalhes-processo__control" value={valorCampo('Prazo final')} onChange={(event) => atualizarCampo('prazoFinal', event.target.value)} /> : <div className="detalhes-processo__control detalhes-processo__control--date">{valorCampo('Prazo final')}<CalendarDays size={15} /></div>}
                   </div>
                 </div>
                 <div className="detalhes-processo__field detalhes-processo__field--notes">
                   <label className="detalhes-processo__label">Observações</label>
-                  <textarea className="detalhes-processo__control detalhes-processo__control--textarea detalhes-processo__control--notes" value={valorCampo('Observações')} readOnly />
+                  <textarea className="detalhes-processo__control detalhes-processo__control--textarea detalhes-processo__control--notes" value={valorCampo('Observações')} readOnly={!modoEdicao} onChange={(event) => atualizarCampo('observacao', event.target.value)} />
                 </div>
-                <button type="button" className="detalhes-processo__save-button"><Save size={15} /> Salvar alterações</button>
+                {modoEdicao && <button type="button" className="detalhes-processo__save-button" onClick={() => setModoEdicao(false)}><Save size={15} /> Salvar alterações</button>}
               </section>
               </div>
             </div>
@@ -230,7 +282,7 @@ const DetalhesProcesso: React.FC = () => {
                 <div key={`${item.label}-${item.value}`} className={`detalhes-processo__summary-item ${getSummaryItemClass(item.label)}`}>
                   <span className="detalhes-processo__summary-label">{item.label}</span>
                   <span className={`detalhes-processo__summary-value ${getVariantClass(item.variant)} ${getSummaryValueClass(item.label, item.variant)}`}>
-                    {item.value}
+                    {item.label === 'Situação atual' ? (situacaoAtual || item.value) : item.value}
                   </span>
                 </div>
               ))}
@@ -285,7 +337,7 @@ const DetalhesProcesso: React.FC = () => {
         </div>
 
         <div className="detalhes-processo__header-status">
-          <span className="detalhes-processo__badge detalhes-processo__badge--warning">{processo.statusLabel}</span>
+          <span className="detalhes-processo__badge detalhes-processo__badge--warning">{situacaoAtual || processo.statusLabel}</span>
           <div className="detalhes-processo__header-deadlines">
             <span>Entrada: <strong>{processo.resumo.find((item) => item.label === 'Data de entrada')?.value}</strong></span>
             <span>Prazo final: <strong>{processo.resumo.find((item) => item.label === 'Prazo final')?.value}</strong></span>
@@ -295,11 +347,11 @@ const DetalhesProcesso: React.FC = () => {
         <span className="detalhes-processo__header-deadline-badge">{processo.diasTexto}</span>
 
         <div className="detalhes-processo__header-actions">
-          <button type="button" className="detalhes-processo__button detalhes-processo__button--secondary">
+          <button type="button" className={`detalhes-processo__button detalhes-processo__button--secondary${modoEdicao ? ' detalhes-processo__button--active' : ''}`} onClick={() => setModoEdicao((estadoAtual) => !estadoAtual)}>
             <PencilLine size={16} />
             Editar dados
           </button>
-          <button type="button" className="detalhes-processo__button detalhes-processo__button--primary">
+          <button type="button" className={`detalhes-processo__button detalhes-processo__button--primary${alterandoSituacao ? ' detalhes-processo__button--active' : ''}`} onClick={abrirModalSituacao}>
             <Repeat2 size={16} />
             Alterar situação
           </button>
@@ -324,6 +376,40 @@ const DetalhesProcesso: React.FC = () => {
       </div>
 
       {renderConteudo()}
+
+      {modalSituacaoAberto && (
+        <div className="detalhes-processo__modal-overlay" role="presentation" onClick={fecharModalSituacao}>
+          <section className="detalhes-processo__modal" role="dialog" aria-modal="true" aria-labelledby="alterar-situacao-titulo" onClick={(event) => event.stopPropagation()}>
+            <header className="detalhes-processo__modal-header">
+              <div>
+                <h2 id="alterar-situacao-titulo">Alterar situação</h2>
+                <p>Selecione a nova situação para este processo.</p>
+              </div>
+              <button type="button" className="detalhes-processo__modal-close" aria-label="Fechar" onClick={fecharModalSituacao}>×</button>
+            </header>
+
+            <div className="detalhes-processo__situacoes" role="radiogroup" aria-label="Situações disponíveis">
+              {situacoesDisponiveis.map((situacao) => (
+                <label key={situacao.idTipoSituacaoProcesso} className={`detalhes-processo__situacao-option${situacaoSelecionada === situacao.nmTipoSituacaoProcesso ? ' is-selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="situacao-processo"
+                    value={situacao.nmTipoSituacaoProcesso}
+                    checked={situacaoSelecionada === situacao.nmTipoSituacaoProcesso}
+                    onChange={() => setSituacaoSelecionada(situacao.nmTipoSituacaoProcesso)}
+                  />
+                  <span>{situacao.nmTipoSituacaoProcesso}</span>
+                </label>
+              ))}
+            </div>
+
+            <footer className="detalhes-processo__modal-actions">
+              <button type="button" className="detalhes-processo__modal-button detalhes-processo__modal-button--cancel" onClick={fecharModalSituacao}>Cancelar</button>
+              <button type="button" className="detalhes-processo__modal-button detalhes-processo__modal-button--confirm" onClick={confirmarSituacao} disabled={!situacaoSelecionada}>Confirmar alteração</button>
+            </footer>
+          </section>
+        </div>
+      )}
     </section>
   );
 };
