@@ -219,6 +219,39 @@ body {
   justify-content: center;
 }
 
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root,
+  .app-shell,
+  .app-shell__workspace,
+  .app-content {
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .app-sidebar,
+  .app-sidebar__overlay,
+  .app-header,
+  .app-footer {
+    display: none !important;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .app-content {
+    padding: 0 !important;
+  }
+}
+
 .app-loading {
   align-items: center;
   color: var(--semob-text-muted);

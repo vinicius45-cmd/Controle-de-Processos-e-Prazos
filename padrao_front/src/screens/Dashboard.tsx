@@ -384,7 +384,7 @@ export const Dashboard: React.FC = () => {
       observacao: ''
     };
 
-    definirProcessoSelecionado(processoSelecionado, 'visualizar');
+    definirProcessoSelecionado(processoSelecionado, 'visualizar', 'painel');
     navegarPara('meus-processos');
   };
 

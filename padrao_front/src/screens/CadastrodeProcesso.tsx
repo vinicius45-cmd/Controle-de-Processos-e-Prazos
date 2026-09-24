@@ -418,7 +418,7 @@ const CadastrodeProcesso: React.FC = () => {
     };
 
     const abrirDetalhesProcesso = (processo: FormCadastro): void => {
-      definirProcessoSelecionado(processo, 'visualizar');
+      definirProcessoSelecionado(processo, 'visualizar', 'processos');
       navegarPara('meus-processos');
     };
 

@@ -279,8 +279,9 @@ export interface AppContextType {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   processoSelecionado: FormCadastro | null;
+  origemProcesso: 'painel' | 'processos' | null;
   modoVisualizacaoProcesso: 'editar' | 'visualizar' | null;
-  definirProcessoSelecionado: (processo: FormCadastro | null, modo?: 'editar' | 'visualizar' | null) => void;
+  definirProcessoSelecionado: (processo: FormCadastro | null, modo?: 'editar' | 'visualizar' | null, origem?: 'painel' | 'processos') => void;
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

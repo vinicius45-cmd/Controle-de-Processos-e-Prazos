@@ -16,6 +16,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [activeModuleId, setActiveModuleId] = useState<string>('dashboard');
   const [activeSubMenuId, setActiveSubMenuId] = useState<string | null>(null);
   const [processoSelecionado, setProcessoSelecionado] = useState<FormCadastro | null>(null);
+  const [origemProcesso, setOrigemProcesso] = useState<'painel' | 'processos' | null>(null);
   const [modoVisualizacaoProcesso, setModoVisualizacaoProcesso] = useState<'editar' | 'visualizar' | null>(null);
   
   // Responsive sidebar open state: closed by default on mobile, open on desktop
@@ -39,9 +40,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
 
-  const definirProcessoSelecionado = (processo: FormCadastro | null, modo: 'editar' | 'visualizar' | null = null) => {
+  const definirProcessoSelecionado = (processo: FormCadastro | null, modo: 'editar' | 'visualizar' | null = null, origem?: 'painel' | 'processos') => {
     setProcessoSelecionado(processo);
     setModoVisualizacaoProcesso(modo);
+    setOrigemProcesso(processo ? (origem ?? origemProcesso ?? 'processos') : null);
   };
 
   // Resize listener to adapt sidebar state
@@ -91,6 +93,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       toggleSidebar,
       setSidebarOpen,
       processoSelecionado,
+      origemProcesso,
       modoVisualizacaoProcesso,
       definirProcessoSelecionado
     }}>

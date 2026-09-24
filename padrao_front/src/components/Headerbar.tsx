@@ -10,11 +10,12 @@ import { useAuth } from '../hooks/useAuth';
 
 export const Headerbar: React.FC = () => {
   const { fazerLogout, usuario } = useAuth();
-  const { activeModuleId, navegarPara } = useApp();
+  const { activeModuleId, processoSelecionado, origemProcesso, definirProcessoSelecionado, navegarPara } = useApp();
   const [cadastroFormularioAberto, setCadastroFormularioAberto] = useState(false);
   const telaCadastro = activeModuleId === 'cadastro-processo';
-  const mostrarTituloProcessos = ['dashboard', 'meus-processos', 'administracao'].includes(activeModuleId ?? '');
+  const mostrarTituloProcessos = !processoSelecionado && ['dashboard', 'meus-processos', 'administracao'].includes(activeModuleId ?? '');
   const mostrarBotaoRetorno = telaCadastro && cadastroFormularioAberto;
+  const mostrarRetornoProcesso = Boolean(processoSelecionado);
 
   useEffect(() => {
     const atualizarEstadoFormulario = (event: Event) => {
@@ -34,7 +35,18 @@ export const Headerbar: React.FC = () => {
   return (
     <header className="app-header app-header--compact">
       <div className="app-header__title-group">
-        {mostrarBotaoRetorno ? (
+        {mostrarRetornoProcesso ? (
+          <button
+            className="process-header__back"
+            type="button"
+            onClick={() => {
+              definirProcessoSelecionado(null, null);
+              navegarPara(origemProcesso === 'painel' ? 'dashboard' : 'cadastro-processo');
+            }}
+          >
+            <ArrowLeft aria-hidden="true" size={18} strokeWidth={2} /> {origemProcesso === 'painel' ? 'Voltar para Painel' : 'Voltar para Processos'}
+          </button>
+        ) : mostrarBotaoRetorno ? (
           <button
             className="process-header__back"
             type="button"

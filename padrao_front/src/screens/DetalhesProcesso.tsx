@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CalendarDays, ChevronDown, Info, MoreVertical, PencilLine, Repeat2, Save } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { CalendarDays, Check, ChevronDown, Copy, Info, MoreVertical, PencilLine, Printer, Repeat2, Save } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { useApp } from '../app/AppProvider';
 import { FormCadastro } from '../types';
 import useTiposSituacaoProcesso from '../hooks/useTiposSituacaoProcesso';
 import { localMockTiposSituacaoProcesso } from '../config/mock';
 import HistoricoProcesso from '../components/processos/HistoricoProcesso';
+import DistribuicoesProcesso from '../components/processos/DistribuicoesProcesso';
 import '../styles/DetalhesProcesso.css';
 
 type AbaAtiva = 'dados' | 'distribuicoes' | 'historico';
@@ -153,6 +155,9 @@ const DetalhesProcesso: React.FC = () => {
   const [modalSituacaoAberto, setModalSituacaoAberto] = useState(false);
   const [situacaoAtual, setSituacaoAtual] = useState('');
   const [situacaoSelecionada, setSituacaoSelecionada] = useState('');
+  const [menuAcoesAberto, setMenuAcoesAberto] = useState(false);
+  const [numeroCopiado, setNumeroCopiado] = useState(false);
+  const menuAcoesRef = useRef<HTMLDivElement>(null);
   const { processoSelecionado, definirProcessoSelecionado, navegarPara } = useApp();
   const { tiposSituacaoProcesso } = useTiposSituacaoProcesso();
   const processo = useMemo(() => construirProcessoDetalhe(processoSelecionado), [processoSelecionado]);
@@ -161,6 +166,17 @@ const DetalhesProcesso: React.FC = () => {
   useEffect(() => {
     setSituacaoAtual(processo.statusLabel);
   }, [processo.numeroSei, processo.statusLabel]);
+
+  useEffect(() => {
+    const fecharMenuAoClicarFora = (event: MouseEvent): void => {
+      if (menuAcoesRef.current && !menuAcoesRef.current.contains(event.target as Node)) {
+        setMenuAcoesAberto(false);
+      }
+    };
+
+    document.addEventListener('mousedown', fecharMenuAoClicarFora);
+    return () => document.removeEventListener('mousedown', fecharMenuAoClicarFora);
+  }, []);
 
   const abrirModalSituacao = (): void => {
     setSituacaoSelecionada(situacaoAtual);
@@ -181,15 +197,64 @@ const DetalhesProcesso: React.FC = () => {
     setAlterandoSituacao(false);
   };
 
+  const copiarNumeroProcesso = async (): Promise<void> => {
+    await navigator.clipboard.writeText(processo.numeroSei);
+    setNumeroCopiado(true);
+    setMenuAcoesAberto(false);
+    window.setTimeout(() => setNumeroCopiado(false), 1800);
+  };
+
+  const imprimirDadosProcesso = (): void => {
+    setMenuAcoesAberto(false);
+    const tituloAnterior = document.title;
+    const restaurarTitulo = (): void => {
+      document.title = tituloAnterior;
+      window.removeEventListener('afterprint', restaurarTitulo);
+    };
+
+    document.title = 'SEMOB-DF Gestão de Processos';
+    window.addEventListener('afterprint', restaurarTitulo);
+    window.print();
+  };
+
+  const baixarPdfProcesso = (): void => {
+    const pdf = new jsPDF();
+    const margem = 20;
+    let posicaoY = 22;
+    const adicionarLinha = (rotulo: string, valor: string): void => {
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${rotulo}:`, margem, posicaoY);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(valor || 'Não informado', margem + 42, posicaoY);
+      posicaoY += 8;
+    };
+
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Detalhes do processo', margem, posicaoY);
+    posicaoY += 12;
+    pdf.setFontSize(10);
+    adicionarLinha('Processo SEI', processo.numeroSei);
+    adicionarLinha('Assunto', processo.assunto);
+    adicionarLinha('Situação', situacaoAtual || processo.statusLabel);
+    adicionarLinha('Ente', processo.orgaoOrigem);
+    adicionarLinha('Prazo final', processo.resumo.find((item) => item.label === 'Prazo final')?.value || '');
+    adicionarLinha('Responsável', processoSelecionado?.responsavel || 'Não informado');
+    posicaoY += 4;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Observações', margem, posicaoY);
+    posicaoY += 7;
+    pdf.setFont('helvetica', 'normal');
+    const observacoes = pdf.splitTextToSize(processo.observacao || 'Não informado', 170);
+    pdf.text(observacoes, margem, posicaoY);
+    pdf.save(`processo-${processo.numeroSei.replace(/[^a-zA-Z0-9-]/g, '-')}.pdf`);
+    setMenuAcoesAberto(false);
+  };
+
   const atualizarCampo = (campo: keyof FormCadastro, valor: string | boolean): void => {
     if (!processoSelecionado) return;
 
     definirProcessoSelecionado({ ...processoSelecionado, [campo]: valor }, 'visualizar');
-  };
-
-  const voltarParaProcessos = (): void => {
-    definirProcessoSelecionado(null, null);
-    navegarPara('cadastro-processo');
   };
 
   const renderConteudo = (): React.ReactNode => {
@@ -296,8 +361,8 @@ const DetalhesProcesso: React.FC = () => {
       return <HistoricoProcesso idProcesso={processoSelecionado.id} aba="historico" />;
     }
 
-    if (abaAtiva === 'distribuicoes' && processoSelecionado?.id) {
-      return <HistoricoProcesso idProcesso={processoSelecionado.id} aba="movimentacoes" />;
+    if (abaAtiva === 'distribuicoes' && processoSelecionado) {
+      return <DistribuicoesProcesso idProcesso={processoSelecionado.id ?? processo.numeroSei} />;
     }
 
     return (
@@ -310,19 +375,6 @@ const DetalhesProcesso: React.FC = () => {
 
   return (
     <section className="detalhes-processo-page" aria-label="Detalhes do Processo">
-      <div className="detalhes-processo__topbar">
-        <button type="button" className="detalhes-processo__crumb-button" onClick={voltarParaProcessos}>
-          <ArrowLeft size={16} />
-          <span>Voltar para Processos</span>
-        </button>
-
-        <div className="detalhes-processo__header-user">
-          <span className="detalhes-processo__user-badge">?</span>
-          <span className="detalhes-processo__user-name">Maria Silva</span>
-          <span className="detalhes-processo__user-role">ASSAD</span>
-        </div>
-      </div>
-
       <div className="detalhes-processo__header-card">
         <div className="detalhes-processo__header-main">
           <div className="detalhes-processo__header-subtitle">
@@ -355,9 +407,27 @@ const DetalhesProcesso: React.FC = () => {
             <Repeat2 size={16} />
             Alterar situação
           </button>
-          <button type="button" className="detalhes-processo__icon-button" aria-label="Mais ações">
-            <MoreVertical size={18} />
-          </button>
+          <div className="detalhes-processo__actions-menu" ref={menuAcoesRef}>
+            <button type="button" className="detalhes-processo__icon-button" aria-label="Mais ações" aria-expanded={menuAcoesAberto} onClick={() => setMenuAcoesAberto((estadoAtual) => !estadoAtual)}>
+              <MoreVertical size={18} />
+            </button>
+            {menuAcoesAberto && (
+              <div className="detalhes-processo__actions-dropdown" role="menu">
+                <button type="button" role="menuitem" onClick={() => void copiarNumeroProcesso()}>
+                  {numeroCopiado ? <Check size={15} /> : <Copy size={15} />}
+                  {numeroCopiado ? 'Número copiado' : 'Copiar número do processo SEI'}
+                </button>
+                <button type="button" role="menuitem" onClick={baixarPdfProcesso}>
+                  <Printer size={15} />
+                  Baixar PDF
+                </button>
+                <button type="button" role="menuitem" onClick={imprimirDadosProcesso}>
+                  <Printer size={15} />
+                  Imprimir dados do processo
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -410,6 +480,7 @@ const DetalhesProcesso: React.FC = () => {
           </section>
         </div>
       )}
+
     </section>
   );
 };
