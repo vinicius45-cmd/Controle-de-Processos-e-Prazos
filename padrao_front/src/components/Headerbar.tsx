@@ -92,7 +92,7 @@ export const Headerbar: React.FC = () => {
         <div className="app-header__profile">
           <button aria-label="Menu do usuário" className="app-header__profile-button" onClick={fazerLogout} type="button">
             <span className="app-header__user-copy">
-              <strong>{usuario?.nome ?? 'Maria Silva'}</strong>
+              <strong>{usuario?.nome ?? 'Usuário não identificado'}</strong>
               <small>{usuario?.departamento ?? 'ASSAD'}</small>
             </span>
             <ChevronDown size={15} />

@@ -32,6 +32,48 @@ export const ProcessoService = {
     }
   },
 
+  async listarPorPrazo(idUnidade: number, dataLimite: string): Promise<Processo[]> {
+    try {
+      const { data } = await api.get<Processo[]>(`/processos/unidade/${idUnidade}/prazos`, {
+        params: { dataLimite }
+      });
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      return lerLocalmente().filter((processo) => (
+        processo.idUnidade === idUnidade && processo.prazoFinal <= dataLimite
+      ));
+    }
+  },
+
+  async buscar(idProcesso: number | string): Promise<Processo> {
+    try {
+      const { data } = await api.get<Processo>(`/processos/${idProcesso}`);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const processo = lerLocalmente().find((item) => String(item.idProcesso ?? item.id) === String(idProcesso));
+      if (!processo) throw new Error('Processo não encontrado');
+      return processo;
+    }
+  },
+
+  async atualizar(idProcesso: number | string, dados: Partial<FormCadastro>): Promise<Processo> {
+    try {
+      const { data } = await api.patch<Processo>(`/processos/${idProcesso}`, dados);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const processos = lerLocalmente();
+      const indice = processos.findIndex((item) => String(item.idProcesso ?? item.id) === String(idProcesso));
+      if (indice < 0) throw new Error('Processo não encontrado');
+      const atualizado = { ...processos[indice], ...dados };
+      processos[indice] = atualizado;
+      salvarLocalmente(processos);
+      return atualizado;
+    }
+  },
+
   async salvar(processo: FormCadastro): Promise<Processo> {
     const payload = {
       processoExternalId: processo.processoINCRA || processo.requerimento,
@@ -64,7 +106,6 @@ export const ProcessoService = {
       return processoLocal;
     }
   },
-
 };
 
 export default ProcessoService;

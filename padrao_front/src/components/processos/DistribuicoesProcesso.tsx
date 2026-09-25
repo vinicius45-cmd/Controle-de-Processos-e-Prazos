@@ -4,6 +4,7 @@ import ProcessoDistribuicaoService from '../../services/ProcessoDistribuicaoServ
 import DistribuicaoSituacaoService from '../../services/DistribuicaoSituacaoService';
 import TipoSituacaoDistribuicaoService from '../../services/TipoSituacaoDistribuicaoService';
 import UnidadeService from '../../services/UnidadeService';
+import { isMockApi } from '../../config/api';
 import { DistribuicaoSituacao, ProcessoDistribuicao, TipoSituacaoDistribuicao, Unidade } from '../../types';
 
 interface LinhaDistribuicao {
@@ -35,10 +36,10 @@ const formatarData = (valor?: string | null): string => {
 };
 
 const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcesso }) => {
-  const [linhas, setLinhas] = useState<LinhaDistribuicao[]>(distribuicoesIniciais);
+  const [linhas, setLinhas] = useState<LinhaDistribuicao[]>(isMockApi ? distribuicoesIniciais : []);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [tiposSituacao, setTiposSituacao] = useState<TipoSituacaoDistribuicao[]>([]);
-  const [selecionada, setSelecionada] = useState<LinhaDistribuicao>(distribuicoesIniciais[1]);
+  const [selecionada, setSelecionada] = useState<LinhaDistribuicao | null>(isMockApi ? distribuicoesIniciais[1] : null);
   const [mostrarCadastro, setMostrarCadastro] = useState(false);
   const [novaUnidade, setNovaUnidade] = useState('');
   const [novoPrazo, setNovoPrazo] = useState('');
@@ -56,7 +57,11 @@ const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcess
         if (!ativo) return;
         setUnidades(listaUnidades);
         setTiposSituacao(listaTipos);
-        if (distribuicoes.length === 0) return;
+        if (distribuicoes.length === 0) {
+          setLinhas([]);
+          setSelecionada(null);
+          return;
+        }
         const carregadas = await Promise.all(distribuicoes.map(async (item): Promise<LinhaDistribuicao> => {
           const historico = await DistribuicaoSituacaoService.listarPorDistribuicao(item.idDistribuicao);
           const atual = historico.find((situacao) => !situacao.dtFim) ?? historico[historico.length - 1];
@@ -68,7 +73,13 @@ const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcess
         setLinhas(carregadas);
         setSelecionada(carregadas[0]);
       } catch {
-        if (ativo) setLinhas(distribuicoesIniciais);
+        if (ativo && !isMockApi) {
+          setLinhas([]);
+          setSelecionada(null);
+        } else if (ativo) {
+          setLinhas(distribuicoesIniciais);
+          setSelecionada(distribuicoesIniciais[1]);
+        }
       }
     };
     void carregar();
@@ -135,7 +146,7 @@ const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcess
           <table className="distribuicoes-processo__table">
             <thead><tr><th>Unidade</th><th>Distribuído em</th><th>Prazo</th><th>Situação</th><th>Retorno</th><th>Controle</th><th /></tr></thead>
             <tbody>{linhas.map((linha) => (
-              <tr key={linha.id} className={selecionada.id === linha.id ? 'is-selected' : ''} onClick={() => setSelecionada(linha)}>
+              <tr key={linha.id} className={selecionada?.id === linha.id ? 'is-selected' : ''} onClick={() => setSelecionada(linha)}>
                 <td><button type="button" className="distribuicoes-processo__unit-link" onClick={() => setSelecionada(linha)}>{linha.unidade}</button></td>
                 <td>{linha.distribuidoEm}</td><td>{linha.prazo}</td>
                 <td><span className={`distribuicoes-processo__status distribuicoes-processo__status--${linha.situacaoTipo}`}>{linha.situacao}</span></td>
@@ -148,7 +159,7 @@ const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcess
           <div className="distribuicoes-processo__note"><Eye size={15} /> Clique em uma unidade para ver detalhes e atualizar a situação.</div>
         </div>
 
-        <aside className="distribuicoes-processo__details">
+        {selecionada && <aside className="distribuicoes-processo__details">
           <button type="button" className="distribuicoes-processo__details-close" aria-label="Fechar detalhes"><X size={15} /></button>
           <h3>{selecionada.unidade}</h3>
           <dl>
@@ -158,10 +169,8 @@ const DistribuicoesProcesso: React.FC<DistribuicoesProcessoProps> = ({ idProcess
             <dt>Conclusão</dt><dd>{selecionada.situacaoTipo === 'concluido' ? selecionada.retorno : '—'}</dd>
           </dl>
           <div className="distribuicoes-processo__details-section"><strong>SITUAÇÃO ATUAL</strong><span className={`distribuicoes-processo__status distribuicoes-processo__status--${selecionada.situacaoTipo}`}>{selecionada.situacao}</span></div>
-          <div className="distribuicoes-processo__details-alert"><AlertTriangle size={14} /> Prazo da unidade vencido há 1 dia</div>
-          <div className="distribuicoes-processo__details-section"><strong>Ações</strong><div className="distribuicoes-processo__details-actions"><button type="button">Editar dados</button><button type="button">Atualizar situação</button></div></div>
-          <div className="distribuicoes-processo__details-section"><strong>Histórico</strong><ol><li><b>{selecionada.prazo}</b><span>{selecionada.situacao.toUpperCase()}</span><small>Maria Silva</small></li><li><b>{selecionada.distribuidoEm}</b><span>PENDENTE</span><small>Maria Silva</small></li></ol></div>
-        </aside>
+          <div className="distribuicoes-processo__details-section"><strong>Situação registrada</strong><ol><li><b>{selecionada.prazo}</b><span>{selecionada.situacao.toUpperCase()}</span><small>Responsável não informado</small></li></ol></div>
+        </aside>}
       </div>
     </section>
   );

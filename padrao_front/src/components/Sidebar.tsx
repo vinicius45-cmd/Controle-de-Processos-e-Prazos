@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen = false,
   onCloseMobile,
 }) => {
-  const { fazerLogout } = useAuth();
+  const { fazerLogout, usuario } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
@@ -146,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="app-sidebar__user-avatar">MS</div>
           {(!collapsed || isMobile) && (
             <div className="app-sidebar__user-copy">
-              <strong>Maria Silva</strong>
+              <strong>{usuario?.nome ?? 'Usuário não identificado'}</strong>
               <span>ASSAD</span>
             </div>
           )}

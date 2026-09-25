@@ -9,10 +9,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const STORAGE_USER_KEY = 'sim_usuario_data';
 const STORAGE_TOKEN_KEY = 'sim_auth_token';
 
-// TODO: remover este bypass quando a integra\u00e7\u00e3o com o CDP estiver dispon\u00edvel.
-// Enquanto isso, qualquer preenchimento v\u00e1lido na tela de login cria uma sess\u00e3o local
-// com acesso completo ao sistema, sem consultar usu\u00e1rios ou permiss\u00f5es no CDP.
-const CDP_VALIDATION_DISABLED = true;
+const CDP_VALIDATION_DISABLED = false;
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(() => {

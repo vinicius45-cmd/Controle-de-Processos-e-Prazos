@@ -19,6 +19,18 @@ export const UnidadeService = {
     }
   },
 
+  async buscar(idUnidade: number | string): Promise<Unidade> {
+    try {
+      const { data } = await api.get<Unidade>(`/unidades/${idUnidade}`);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const unidade = localMockUnidades.find((item) => String(item.idUnidade) === String(idUnidade));
+      if (!unidade) throw new Error('Unidade não encontrada');
+      return unidade;
+    }
+  },
+
   async cadastrar(dados: DadosUnidade): Promise<Unidade> {
     try {
       const { data } = await api.post<Unidade>('/unidades', { ...dados, blAtivo: 'S' });

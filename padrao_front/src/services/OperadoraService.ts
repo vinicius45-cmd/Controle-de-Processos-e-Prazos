@@ -1,4 +1,4 @@
-import { api } from '../config/api';
+import { api, isMockApi } from '../config/api';
 import { Operadora } from '../types';
 
 import { localMockOperadoras } from '../config/mock';
@@ -12,7 +12,7 @@ export const OperadoraService = {
       });
       return data;
     } catch (e) {
-      // Fallback para Dados Mockados no Boilerplate se a API estiver offline
+      if (!isMockApi) throw e;
       console.warn('API Offline. Retornando dados mockados do Boilerplate SEMOB.');
       if (!filtro) return localMockOperadoras;
       return localMockOperadoras.filter(op => op.nmOperadora.toLowerCase().includes(filtro.toLowerCase()));
@@ -22,10 +22,10 @@ export const OperadoraService = {
   async cadastrar(nmOperadora: string): Promise<Operadora> {
     try {
       const { data } = await api.post<Operadora>('/operadoras', { nmOperadora });
-      // Update local mock list too
-      localMockOperadoras.push(data);
+      if (isMockApi) localMockOperadoras.push(data);
       return data;
     } catch (e) {
+      if (!isMockApi) throw e;
       console.warn('API Offline. Criando operadora no cache local do Boilerplate.');
       const newOp: Operadora = {
         idOperadora: Math.floor(Math.random() * 900) + 600,

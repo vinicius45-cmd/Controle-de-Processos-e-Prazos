@@ -107,6 +107,24 @@ export interface DistribuicaoSituacao {
   idUsuarioCriacao?: number;
 }
 
+export interface UsuarioUnidade {
+  idUsuarioUnidade: number;
+  idUsuario: number;
+  idUnidade: number;
+  dtInicioVigencia?: string;
+  dtFimVigencia?: string | null;
+  blAtivo?: 'S' | 'N';
+  dtCriacao?: string;
+  idUsuarioCriacao?: number;
+}
+
+export interface Linha {
+  idLinha: number | string;
+  nmLinha: string;
+  sgLinha?: string;
+  blAtivo?: 'S' | 'N';
+}
+
 export interface Usuario {
   id: string; // Nickname
   idUsuario?: number;

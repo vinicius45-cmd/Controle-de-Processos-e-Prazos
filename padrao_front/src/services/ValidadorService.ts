@@ -1,8 +1,10 @@
 import { Validador } from '../types';
+import { isMockApi } from '../config/api';
 
 export const ValidadorService = {
   // Função que simula a busca de dados em uma API
   getValidadores: async (): Promise<Validador[]> => {
+    if (!isMockApi) return [];
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve([

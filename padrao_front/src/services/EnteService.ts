@@ -63,29 +63,6 @@ export const EnteService = {
     }
   },
 
-  async visualizarAtivos(): Promise<void> {
-    try {
-      await api.get(`/entes/ativos`);
-    } catch {}
-  },
-
-  async visualizarEntes(): Promise<void> {
-    try {
-      await api.get(`/entes`);
-    } catch {}
-  },
-
-  async visualizarIds(): Promise<void> {
-    try {
-      await api.get(`/entes/:id`);
-    } catch {}
-  },
-
-  async visualizarSiglas(): Promise<void> {
-    try {
-      await api.get(`/entes/sigla/:sigla`);
-    } catch {}
-  }
 };
 
 export default EnteService;

@@ -3,6 +3,7 @@ import { CalendarDays, Check, ChevronDown, Copy, Info, MoreVertical, PencilLine,
 import { jsPDF } from 'jspdf';
 import { useApp } from '../app/AppProvider';
 import { FormCadastro } from '../types';
+import { isMockApi } from '../config/api';
 import useTiposSituacaoProcesso from '../hooks/useTiposSituacaoProcesso';
 import { localMockTiposSituacaoProcesso } from '../config/mock';
 import HistoricoProcesso from '../components/processos/HistoricoProcesso';
@@ -74,7 +75,7 @@ const mapearOrgao = (value?: string): string => {
     'orgao-de-controle': 'Órgão de Controle'
   };
 
-  return mapa[value ?? ''] || value || 'TCDF';
+  return mapa[value ?? ''] || value || 'Não informado';
 };
 
 const mapearSituacao = (value?: string): string => {
@@ -86,11 +87,11 @@ const mapearSituacao = (value?: string): string => {
     'em analise': 'Em análise'
   };
 
-  return mapa[(value ?? '').toLowerCase()] || value || 'Aguardando retorno';
+  return mapa[(value ?? '').toLowerCase()] || value || 'Não informado';
 };
 
 const calcularDiasRestantes = (prazo?: string): number => {
-  if (!prazo) return 2;
+  if (!prazo) return 0;
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -102,15 +103,15 @@ const calcularDiasRestantes = (prazo?: string): number => {
 };
 
 const construirProcessoDetalhe = (processo: FormCadastro | null): ProcessoDetalhe => {
-  const prazoFinal = processo?.prazoFinal || '2026-09-04';
+  const prazoFinal = processo?.prazoFinal || '';
   const diasRestantes = calcularDiasRestantes(prazoFinal);
-  const statusLabel = 'AGUARDANDO RETORNO';
-  const diasTexto = diasRestantes <= 0 ? 'Hoje' : `${diasRestantes} dias`;
+  const statusLabel = mapearSituacao(processo?.situacaoProcesso);
+  const diasTexto = prazoFinal ? (diasRestantes <= 0 ? 'Hoje' : `${diasRestantes} dias`) : 'Não informado';
 
-  const numeroSei = processo?.processoINCRA || '00090-000012345/2026-11';
-  const assunto = processo?.assunto || 'Solicitação de informações sobre graduados do STPC/DF';
-  const orgaoOrigem = mapearOrgao(processo?.orgaoOrigem || 'secretaria-saude');
-  const observacao = processo?.observacao || 'Solicitação encaminhada pelo Tribunal de Contas do DF.';
+  const numeroSei = processo?.processoINCRA || 'Não informado';
+  const assunto = processo?.assunto || 'Não informado';
+  const orgaoOrigem = mapearOrgao(processo?.orgaoOrigem);
+  const observacao = processo?.observacao || 'Não informado';
 
   return {
     numeroSei,
@@ -122,12 +123,12 @@ const construirProcessoDetalhe = (processo: FormCadastro | null): ProcessoDetalh
     ultimaAtualizacao: formatDateTime(),
     dados: [
       { label: 'Ente', value: orgaoOrigem },
-      { label: 'Tipo de documento', value: processo?.assuntoTipo || 'Ofício' },
-      { label: 'N° do documento', value: processo?.documentoSEI || '279/2026' },
-      { label: 'Tipo de assunto', value: processo?.assuntoTipo || 'Órgão de Controle' },
+      { label: 'Tipo de documento', value: processo?.assuntoTipo || 'Não informado' },
+      { label: 'N° do documento', value: processo?.documentoSEI || 'Não informado' },
+      { label: 'Tipo de assunto', value: processo?.assuntoTipo || 'Não informado' },
       { label: 'Assunto', value: assunto, wide: true },
       { label: 'Processo especial', value: 'Não', isCheckbox: true, checked: Boolean(processo?.especial) },
-      { label: 'Data de entrada', value: formatDate(processo?.dataEntrada || '2026-08-28') },
+      { label: 'Data de entrada', value: formatDate(processo?.dataEntrada) },
       { label: 'Prazo final', value: formatDate(prazoFinal) },
       { label: 'Observações', value: observacao, wide: true }
     ],
@@ -135,15 +136,15 @@ const construirProcessoDetalhe = (processo: FormCadastro | null): ProcessoDetalh
       { label: 'Situação atual', value: statusLabel, variant: 'warning' },
       { label: 'Prioridade', value: diasRestantes <= 2 ? 'Alta' : 'Normal', variant: diasRestantes <= 2 ? 'danger' : 'neutral' },
       { label: 'Prazo final', value: formatDate(prazoFinal), variant: 'neutral' },
-      { label: 'Dias para o prazo', value: diasTexto, variant: diasRestantes <= 2 ? 'danger' : 'info' },
-      { label: 'Data de entrada', value: formatDate(processo?.dataEntrada || '2026-08-28'), variant: 'neutral' },
+      { label: 'Dias para o prazo', value: diasTexto, variant: prazoFinal && diasRestantes <= 2 ? 'danger' : 'info' },
+      { label: 'Data de entrada', value: formatDate(processo?.dataEntrada), variant: 'neutral' },
       { label: 'Ente', value: orgaoOrigem, variant: 'neutral' },
-      { label: 'Tipo de documento', value: processo?.assuntoTipo || 'Ofício', variant: 'neutral' },
-      { label: 'N° do documento', value: processo?.documentoSEI || '279/2026', variant: 'neutral' },
-      { label: 'Tipo de assunto', value: processo?.assuntoTipo || 'Órgão de Controle', variant: 'neutral' },
+      { label: 'Tipo de documento', value: processo?.assuntoTipo || 'Não informado', variant: 'neutral' },
+      { label: 'N° do documento', value: processo?.documentoSEI || 'Não informado', variant: 'neutral' },
+      { label: 'Tipo de assunto', value: processo?.assuntoTipo || 'Não informado', variant: 'neutral' },
       { label: 'Especial', value: Boolean(processo?.especial) ? 'Sim' : 'Não', variant: 'neutral' },
       { label: 'Observações', value: observacao, variant: 'neutral' },
-      { label: 'Última atualização', value: `${formatDateTime()} por ${processo?.responsavel || 'Maria Silva'}`, variant: 'neutral' }
+      { label: 'Última atualização', value: processo?.dtAtualizacao ? formatDateTime(processo.dtAtualizacao) : 'Não informado', variant: 'neutral' }
     ]
   };
 };
@@ -161,7 +162,9 @@ const DetalhesProcesso: React.FC = () => {
   const { processoSelecionado, definirProcessoSelecionado, navegarPara } = useApp();
   const { tiposSituacaoProcesso } = useTiposSituacaoProcesso();
   const processo = useMemo(() => construirProcessoDetalhe(processoSelecionado), [processoSelecionado]);
-  const situacoesDisponiveis = tiposSituacaoProcesso.length > 0 ? tiposSituacaoProcesso : localMockTiposSituacaoProcesso;
+  const situacoesDisponiveis = tiposSituacaoProcesso.length > 0
+    ? tiposSituacaoProcesso
+    : (isMockApi ? localMockTiposSituacaoProcesso : []);
 
   useEffect(() => {
     setSituacaoAtual(processo.statusLabel);
@@ -361,8 +364,8 @@ const DetalhesProcesso: React.FC = () => {
       return <HistoricoProcesso idProcesso={processoSelecionado.id} aba="historico" />;
     }
 
-    if (abaAtiva === 'distribuicoes' && processoSelecionado) {
-      return <DistribuicoesProcesso idProcesso={processoSelecionado.id ?? processo.numeroSei} />;
+    if (abaAtiva === 'distribuicoes') {
+      return <DistribuicoesProcesso idProcesso={processoSelecionado?.id ?? processo.numeroSei} />;
     }
 
     return (
@@ -381,54 +384,46 @@ const DetalhesProcesso: React.FC = () => {
             <strong className="detalhes-processo__numero">PROCESSO {processo.numeroSei}</strong>
             <div className="detalhes-processo__header-label">{processo.assunto}</div>
             <div className="detalhes-processo__header-meta">
-              <span>TCDF</span>
+              <span>{processo.orgaoOrigem}</span>
               <span className="sep-dot">•</span>
-              <span>Órgão de Controle</span>
+              <span>{processo.dados.find((item) => item.label === 'Tipo de assunto')?.value ?? 'Não informado'}</span>
             </div>
           </div>
         </div>
 
-        <div className="detalhes-processo__header-status">
-          <span className="detalhes-processo__badge detalhes-processo__badge--warning">{situacaoAtual || processo.statusLabel}</span>
-          <div className="detalhes-processo__header-deadlines">
-            <span>Entrada: <strong>{processo.resumo.find((item) => item.label === 'Data de entrada')?.value}</strong></span>
-            <span>Prazo final: <strong>{processo.resumo.find((item) => item.label === 'Prazo final')?.value}</strong></span>
-          </div>
-        </div>
-
-        <span className="detalhes-processo__header-deadline-badge">{processo.diasTexto}</span>
-
-        <div className="detalhes-processo__header-actions">
-          <button type="button" className={`detalhes-processo__button detalhes-processo__button--secondary${modoEdicao ? ' detalhes-processo__button--active' : ''}`} onClick={() => setModoEdicao((estadoAtual) => !estadoAtual)}>
-            <PencilLine size={16} />
-            Editar dados
-          </button>
-          <button type="button" className={`detalhes-processo__button detalhes-processo__button--primary${alterandoSituacao ? ' detalhes-processo__button--active' : ''}`} onClick={abrirModalSituacao}>
-            <Repeat2 size={16} />
-            Alterar situação
-          </button>
-          <div className="detalhes-processo__actions-menu" ref={menuAcoesRef}>
-            <button type="button" className="detalhes-processo__icon-button" aria-label="Mais ações" aria-expanded={menuAcoesAberto} onClick={() => setMenuAcoesAberto((estadoAtual) => !estadoAtual)}>
-              <MoreVertical size={18} />
+        {abaAtiva === 'dados' && (
+          <div className="detalhes-processo__header-actions">
+            <button type="button" className={`detalhes-processo__button detalhes-processo__button--secondary${modoEdicao ? ' detalhes-processo__button--active' : ''}`} onClick={() => setModoEdicao((estadoAtual) => !estadoAtual)}>
+              <PencilLine size={16} />
+              Editar dados
             </button>
-            {menuAcoesAberto && (
-              <div className="detalhes-processo__actions-dropdown" role="menu">
-                <button type="button" role="menuitem" onClick={() => void copiarNumeroProcesso()}>
-                  {numeroCopiado ? <Check size={15} /> : <Copy size={15} />}
-                  {numeroCopiado ? 'Número copiado' : 'Copiar número do processo SEI'}
-                </button>
-                <button type="button" role="menuitem" onClick={baixarPdfProcesso}>
-                  <Printer size={15} />
-                  Baixar PDF
-                </button>
-                <button type="button" role="menuitem" onClick={imprimirDadosProcesso}>
-                  <Printer size={15} />
-                  Imprimir dados do processo
-                </button>
-              </div>
-            )}
+            <button type="button" className={`detalhes-processo__button detalhes-processo__button--primary${alterandoSituacao ? ' detalhes-processo__button--active' : ''}`} onClick={abrirModalSituacao}>
+              <Repeat2 size={16} />
+              Alterar situação
+            </button>
+            <div className="detalhes-processo__actions-menu" ref={menuAcoesRef}>
+              <button type="button" className="detalhes-processo__icon-button" aria-label="Mais ações" aria-expanded={menuAcoesAberto} onClick={() => setMenuAcoesAberto((estadoAtual) => !estadoAtual)}>
+                <MoreVertical size={18} />
+              </button>
+              {menuAcoesAberto && (
+                <div className="detalhes-processo__actions-dropdown" role="menu">
+                  <button type="button" role="menuitem" onClick={() => void copiarNumeroProcesso()}>
+                    {numeroCopiado ? <Check size={15} /> : <Copy size={15} />}
+                    {numeroCopiado ? 'Número copiado' : 'Copiar número do processo SEI'}
+                  </button>
+                  <button type="button" role="menuitem" onClick={baixarPdfProcesso}>
+                    <Printer size={15} />
+                    Baixar PDF
+                  </button>
+                  <button type="button" role="menuitem" onClick={imprimirDadosProcesso}>
+                    <Printer size={15} />
+                    Imprimir dados do processo
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="detalhes-processo__tabs" role="tablist" aria-label="Navegação por abas do processo">

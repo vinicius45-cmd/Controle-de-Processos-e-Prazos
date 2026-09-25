@@ -11,6 +11,7 @@ import TipoDocumentoService from '../services/TipoDocumentoService';
 import SituacaoCatalogo from '../components/admin/SituacaoCatalogo';
 import HierarquiaCatalogo from '../components/admin/HierarquiaCatalogo';
 import '../styles/Administracao.css';
+import { isMockApi } from '../config/api';
 
 type TabAdministracao = 'usuarios' | 'entes' | 'unidades' | 'hierarquia' | 'tipos-assunto' | 'tipos-documento' | 'situacoes-processo' | 'situacoes-distribuicao' | 'configuracoes' | 'permissoes';
 
@@ -101,8 +102,8 @@ const statusLabel: Record<StatusUsuario, string> = {
 
 const Administracao: React.FC = () => {
   const [abaAtiva, setAbaAtiva] = useState<TabAdministracao>('usuarios');
-  const [configuracoes, setConfiguracoes] = useState<ConfiguracaoSistema>(configuracoesMock);
-  const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>(usuariosMock);
+  const [configuracoes, setConfiguracoes] = useState<ConfiguracaoSistema>(isMockApi ? configuracoesMock : { habilitarEmail: false, modoUrgenciaAutomatico: false, permitirAcessoExterno: false });
+  const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>(isMockApi ? usuariosMock : []);
   const [isFormularioAberto, setIsFormularioAberto] = useState(false);
   const [modoEdicao, setModoEdicao] = useState<'novo' | 'editar'>('novo');
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<UsuarioAdmin | null>(null);
@@ -115,12 +116,12 @@ const Administracao: React.FC = () => {
   const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<UsuarioAdmin | null>(null);
   const [isConfirmacaoExcluirAberto, setIsConfirmacaoExcluirAberto] = useState(false);
   const [configuracoesSalvas, setConfiguracoesSalvas] = useState(false);
-  const [permissoes, setPermissoes] = useState<PermissaoAdmin[]>([
+  const [permissoes, setPermissoes] = useState<PermissaoAdmin[]>(isMockApi ? [
     { id: 'cdp-usuarios', nome: 'Gerenciar usuários', descricao: 'Permite visualizar e editar usuários do sistema.', nivel: 'ESCRITA' as const },
     { id: 'cdp-grupos', nome: 'Gerenciar perfis', descricao: 'Permite alterar perfis e grupos de acesso.', nivel: 'ESCRITA' as const },
     { id: 'cdp-sistemas', nome: 'Acessar controle de sistemas', descricao: 'Permite acesso ao painel de sistemas no CDP.', nivel: 'LEITURA' as const },
     { id: 'sif-validador', nome: 'Validadores', descricao: 'Permite acessar a lista de validadores.', nivel: 'LEITURA' as const }
-  ]);
+  ] : []);
   const [permissoesSalvas, setPermissoesSalvas] = useState(false);
   const [entes, setEntes] = useState<Ente[]>([]);
   const [entesLoading, setEntesLoading] = useState(false);

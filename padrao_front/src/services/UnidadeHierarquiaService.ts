@@ -18,7 +18,9 @@ const possuiCicloLocal = (idUnidade: number, idUnidadeSuperior: number | null | 
 
 export const UnidadeHierarquiaService = {
   async listarVigentes(idUnidades: number[] = []): Promise<UnidadeHierarquia[]> {
-    if (idUnidades.length === 0) return localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S');
+    if (idUnidades.length === 0) {
+      return isMockApi ? localMockUnidadesHierarquia.filter((item) => item.blVigente === 'S') : [];
+    }
     try {
       const respostas = await Promise.all(idUnidades.map((idUnidade) => this.vigentesDaUnidade(idUnidade)));
       return respostas.flat();
@@ -35,6 +37,18 @@ export const UnidadeHierarquiaService = {
     } catch (error) {
       if (!isMockApi) throw error;
       return localMockUnidadesHierarquia.filter((item) => item.idUnidade === idUnidade);
+    }
+  },
+
+  async buscar(idUnidadeHierarquia: number | string): Promise<UnidadeHierarquia> {
+    try {
+      const { data } = await api.get<UnidadeHierarquia>(`/unidades-hierarquias/${idUnidadeHierarquia}`);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const item = localMockUnidadesHierarquia.find((value) => String(value.idUnidadeHierarquia) === String(idUnidadeHierarquia));
+      if (!item) throw new Error('Vínculo hierárquico não encontrado');
+      return item;
     }
   },
 

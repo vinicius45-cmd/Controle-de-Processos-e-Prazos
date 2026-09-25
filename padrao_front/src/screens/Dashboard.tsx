@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { FormCadastro } from '../types';
 import { useApp } from '../app/AppProvider';
+import UnidadeService from '../services/UnidadeService';
+import ProcessoService from '../services/ProcessoService';
 
 type Criticidade =
   | 'Atrasado'
@@ -100,86 +102,6 @@ const getResumoCards = (processos: Processo[]): ResumoCard[] => [
     descricao: 'Processos especiais',
     variante: 'roxo',
     icone: Puzzle
-  }
-];
-
-const processos: Processo[] = [
-  {
-    id: 1,
-    criticidade: 'Atrasado',
-    numeroSei: '0001234/2024-10',
-    assunto: 'Solicitação de Informação',
-    orgao: 'Secretaria de Saúde',
-    responsavel: 'João da Silva',
-    prazoFinal: '10/05/2024',
-    diasRestantes: '-3 dias',
-    situacao: 'Em andamento'
-  },
-  {
-    id: 2,
-    criticidade: 'Atrasado',
-    numeroSei: '0000987/2024-21',
-    assunto: 'Análise Técnica',
-    orgao: 'Secretaria de Educação',
-    responsavel: 'Maria Santos',
-    prazoFinal: '12/05/2024',
-    diasRestantes: '-1 dia',
-    situacao: 'Em andamento'
-  },
-  {
-    id: 3,
-    criticidade: 'Vence Hoje',
-    numeroSei: '0001122/2024-33',
-    assunto: 'Parecer Técnico',
-    orgao: 'Secretaria de Obras',
-    responsavel: 'Carlos Lima',
-    prazoFinal: '15/05/2024',
-    diasRestantes: 'Hoje',
-    situacao: 'Em andamento'
-  },
-  {
-    id: 4,
-    criticidade: 'Próximo do prazo',
-    numeroSei: '0001355/2024-44',
-    assunto: 'Solicitação de Documentos',
-    orgao: 'Secretaria de Administração',
-    responsavel: 'Juliana Alves',
-    prazoFinal: '18/05/2024',
-    diasRestantes: '3 dias',
-    situacao: 'Em andamento'
-  },
-  {
-    id: 5,
-    criticidade: 'Para Assinatura',
-    numeroSei: '0001444/2024-55',
-    assunto: 'Minuta de Resposta',
-    orgao: 'Secretaria de Planejamento',
-    responsavel: 'João da Silva',
-    prazoFinal: '20/05/2024',
-    diasRestantes: '5 dias',
-    situacao: 'Para assinatura'
-  },
-  {
-    id: 6,
-    criticidade: 'Especial',
-    numeroSei: '0001555/2024-66',
-    assunto: 'Processo Especial',
-    orgao: 'Gabinete do Prefeito',
-    responsavel: 'Maria Santos',
-    prazoFinal: '30/05/2024',
-    diasRestantes: '15 dias',
-    situacao: 'Em andamento'
-  },
-  {
-    id: 7,
-    criticidade: 'OK',
-    numeroSei: '0001666/2024-77',
-    assunto: 'Informações Gerais',
-    orgao: 'Secretaria de Finanças',
-    responsavel: 'Carlos Lima',
-    prazoFinal: '05/06/2024',
-    diasRestantes: '21 dias',
-    situacao: 'Em andamento'
   }
 ];
 
@@ -326,7 +248,7 @@ const converterParaProcesso = (form: FormCadastro, index: number): Processo => {
     responsavel: form.responsavel || 'Não atribuído',
     prazoFinal: form.prazoFinal ? formatarPrazoFinal(form.prazoFinal) : '',
     diasRestantes: diasTexto,
-    situacao: (form.situacaoProcesso === 'em-andamento' ? 'Em andamento' : 'Em andamento') as SituacaoProcesso
+    situacao: form.situacaoProcesso === 'para-assinatura' ? 'Para assinatura' : 'Em andamento'
   };
 };
 
@@ -340,23 +262,22 @@ export const Dashboard: React.FC = () => {
   const [mostrarTodosProcessos, setMostrarTodosProcessos] = useState(false);
 
   useEffect(() => {
-    // Carrega processos do localStorage
-    const processosArmazenados = localStorage.getItem('processos_cadastrados');
-    if (processosArmazenados) {
+    let ativo = true;
+    const carregarProcessos = async (): Promise<void> => {
       try {
-        const armazenados: FormCadastro[] = JSON.parse(processosArmazenados);
-        const processosConvertidos = armazenados.map((form, index) =>
-          converterParaProcesso(form, index)
+        const unidades = await UnidadeService.listar('', true);
+        const processosPorUnidade = await Promise.all(
+          unidades.map((unidade) => ProcessoService.listarPorUnidade(unidade.idUnidade))
         );
-        // Combina com os dados mockados
-        setProcessosExibicao([...processos, ...processosConvertidos]);
+        if (!ativo) return;
+        setProcessosExibicao(processosPorUnidade.flat().map((processo, index) => converterParaProcesso(processo, index)));
       } catch (erro) {
         console.error('Erro ao carregar processos:', erro);
-        setProcessosExibicao(processos);
+        if (ativo) setProcessosExibicao([]);
       }
-    } else {
-      setProcessosExibicao(processos);
-    }
+    };
+    void carregarProcessos();
+    return () => { ativo = false; };
   }, []);
 
   const handleSelecionarCard = (titulo: string) => {
@@ -484,7 +405,6 @@ export const Dashboard: React.FC = () => {
         <div className="management-heading__actions" aria-label="Ações rápidas do dashboard">
           <button type="button" className="management-heading__action management-heading__action--alert" aria-label="Notificações">
             <Bell size={18} />
-            <span className="management-heading__badge">3</span>
           </button>
           <button type="button" className="management-heading__action" aria-label="Ajuda">
             <HelpCircle size={18} />
@@ -504,19 +424,30 @@ export const Dashboard: React.FC = () => {
 
       <div className="management-metrics">
         {[
-          { label: 'Processos ativos', value: '127', tone: 'blue', icon: ClipboardList, filter: 'Total de Processos' },
-          { label: 'Atrasados', value: '14', tone: 'red', icon: AlertTriangle, filter: 'Atrasados' },
-          { label: 'Vencem hoje', value: '5', tone: 'orange', icon: Clock3, filter: 'Vence Hoje' },
-          { label: 'Próx. 5 dias', value: '22', tone: 'yellow', icon: CalendarDays, filter: 'Próximos 5 dias' },
-          { label: 'Aguardando retorno', value: '38', tone: 'purple', icon: RotateCcw, filter: 'Aguardando retorno' },
-          { label: 'Para assinatura', value: '7', tone: 'sky', icon: PenLine, filter: 'Para Assinatura' }
+          { label: 'Processos ativos', index: 0, tone: 'blue', icon: ClipboardList, filter: 'Total de Processos' },
+          { label: 'Atrasados', index: 1, tone: 'red', icon: AlertTriangle, filter: 'Atrasados' },
+          { label: 'Vencem hoje', index: 2, tone: 'orange', icon: Clock3, filter: 'Vence Hoje' },
+          { label: 'Próx. 5 dias', index: 3, tone: 'yellow', icon: CalendarDays, filter: 'Próximos 5 dias' },
+          { label: 'Aguardando retorno', index: 4, tone: 'purple', icon: RotateCcw, filter: 'Aguardando retorno' },
+          { label: 'Para assinatura', index: 5, tone: 'sky', icon: PenLine, filter: 'Para Assinatura' }
         ].map((card) => {
           const Icon = card.icon;
           const estaSelecionado = filtroAtivo === card.filter;
+          const valor = card.index === 0
+            ? processosExibicao.length
+            : card.index === 1
+              ? processosExibicao.filter((processo) => processo.criticidade === 'Atrasado').length
+              : card.index === 2
+                ? processosExibicao.filter((processo) => processo.criticidade === 'Vence Hoje').length
+                : card.index === 3
+                  ? processosExibicao.filter((processo) => processo.criticidade === 'Próximo do prazo').length
+                  : card.index === 4
+                    ? processosExibicao.filter((processo) => processo.situacao === 'Em andamento').length
+                    : processosExibicao.filter((processo) => processo.criticidade === 'Para Assinatura').length;
 
           return <button className={`management-metric management-metric--${card.tone}${estaSelecionado ? ' is-selected' : ''}`} key={card.label} onClick={() => handleSelecionarCard(card.filter)} type="button">
             <span className="management-metric__icon"><Icon size={21} /></span>
-            <span className="management-metric__copy"><small>{card.label}</small><strong>{card.value}</strong><em>Ver processos <span>→</span></em></span>
+            <span className="management-metric__copy"><small>{card.label}</small><strong>{valor}</strong><em>Ver processos <span>→</span></em></span>
           </button>;
         })}
       </div>
@@ -563,7 +494,7 @@ export const Dashboard: React.FC = () => {
             </tr>
           ))}
         </tbody></table></div>
-        <footer className="management-table__footer"><span>Mostrando 1 a {processosVisiveis.length} de 127 processos</span><button type="button">10 por página <ChevronDown size={13} /></button><span>‹</span><b>1</b><span>2</span><span>3</span><span>...</span><span>13</span><span>›</span></footer>
+        <footer className="management-table__footer"><span>Mostrando {processosVisiveis.length} de {processosExibicao.length} processos</span><button type="button">10 por página <ChevronDown size={13} /></button></footer>
       </section>
 
       <div className="management-note"><Info size={15} /> O cálculo de dias considera o prazo final do processo. Clique em um processo para ver detalhes e pendências das unidades.</div>

@@ -15,6 +15,30 @@ export const ProcessoSituacaoService = {
     }
   },
 
+  async buscar(idProcessoSituacao: number | string): Promise<ProcessoSituacao> {
+    try {
+      const { data } = await api.get<ProcessoSituacao>(`/processos-situacoes/${idProcessoSituacao}`);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const item = localMockProcessosSituacoes.find((value) => String(value.idProcessoSituacao) === String(idProcessoSituacao));
+      if (!item) throw new Error('Situação de processo não encontrada');
+      return item;
+    }
+  },
+
+  async atual(idProcesso: number | string): Promise<ProcessoSituacao> {
+    try {
+      const { data } = await api.get<ProcessoSituacao>(`/processos-situacoes/processo/${idProcesso}/atual`);
+      return data;
+    } catch (error) {
+      if (!isMockApi) throw error;
+      const item = localMockProcessosSituacoes.find((value) => String(value.idProcesso) === String(idProcesso) && !value.dtFim);
+      if (!item) throw new Error('Situação atual do processo não encontrada');
+      return item;
+    }
+  },
+
   async cadastrar(dados: DadosSituacao): Promise<ProcessoSituacao> {
     try {
       const { data } = await api.post<ProcessoSituacao>('/processos-situacoes', dados);

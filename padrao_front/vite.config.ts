@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Encaminha o Geproc para evitar CORS no desenvolvimento.
+      '/geproc-api': {
+        target: 'https://dev-sismob.semob.df.gov.br',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/geproc-api/, '/geproc/api')
+      },
       // Evita CORS no desenvolvimento ao encaminhar o CDP pelo servidor Vite
       '/cdp': {
         target: 'https://dev-sismob.semob.df.gov.br',

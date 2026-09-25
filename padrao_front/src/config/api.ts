@@ -1,6 +1,9 @@
 import axios from 'axios';
 
 export const isMockApi = import.meta.env.VITE_USE_MOCK_API === 'true';
+const geprocBaseURL = import.meta.env.DEV
+  ? '/geproc-api'
+  : (import.meta.env.VITE_API_URL || 'https://dev-sismob.semob.df.gov.br/geproc/api');
 const cdpBaseURL = import.meta.env.DEV
   ? '/cdp'
   : (import.meta.env.VITE_CDP_API_URL || 'https://dev-sismob.semob.df.gov.br');
@@ -23,6 +26,6 @@ const criarCliente = (baseURL: string) => {
   return client;
 };
 
-export const api = criarCliente(import.meta.env.VITE_API_URL);
+export const api = criarCliente(geprocBaseURL);
 export const cdpApi = criarCliente(cdpBaseURL);
 

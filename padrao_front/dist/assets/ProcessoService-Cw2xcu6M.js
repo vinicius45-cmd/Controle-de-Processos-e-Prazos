@@ -1,0 +1,6 @@
+import{c as i,k as o}from"./index-BiS9hySS.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const s=i("ChevronRight",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]]),e={async listarPorUnidade(a,r=""){try{const{data:t}=await o.get(`/processos/unidade/${a}`,{params:r?{termo:r}:void 0});return t}catch(t){throw t}},async listarPorPrazo(a,r){try{const{data:t}=await o.get(`/processos/unidade/${a}/prazos`,{params:{dataLimite:r}});return t}catch(t){throw t}},async buscar(a){try{const{data:r}=await o.get(`/processos/${a}`);return r}catch(r){throw r}},async atualizar(a,r){try{const{data:t}=await o.patch(`/processos/${a}`,r);return t}catch(t){throw t}},async salvar(a){const r={processoExternalId:a.processoINCRA||a.requerimento,idEnte:a.idEnte,idUnidade:a.idUnidade,idTipoAssunto:a.idTipoAssunto,idTipoDocumento:a.idTipoDocumento,idTipoSituacaoProcesso:a.idTipoSituacaoProcesso,dsAssunto:a.assunto,dtEntrada:a.dataEntrada,dtPrazoAreaTecnica:a.prazoAreaTecnica||null,dtPrazoFinal:a.prazoFinal,blEspecial:a.especial?"S":"N",dsObservacao:a.observacao,situacaoProcesso:a.situacaoProcesso,responsavel:a.responsavel};try{const{data:t}=a.id?await o.patch(`/processos/${a.id}`,r):await o.post("/processos",r);return t}catch(t){throw t}}};export{s as C,e as P};
